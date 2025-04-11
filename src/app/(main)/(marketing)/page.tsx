@@ -13,7 +13,7 @@ import matter from 'gray-matter';
 import SyntaxHighlighter from 'react-syntax-highlighter';
 import { vs2015, github } from 'react-syntax-highlighter/dist/cjs/styles/hljs';
 import {
-  Code, Moon, Sun, Copy, Check, Github, ExternalLink, 
+  Code, Moon, Sun, Copy, Check, ExternalLink, 
   Terminal, CheckCircle2, Lightbulb, AlertTriangle, Loader2,
   Globe, Eye, BookOpen, Zap, Download, FileCode, Server, TableIcon,
   Sparkles, ArrowRight, Hash, Quote, List, ListOrdered, Image, Table, Link2,
@@ -22,6 +22,8 @@ import {
 
 import { motion, AnimatePresence } from 'framer-motion';
 import type { ComponentPropsWithoutRef } from 'react';
+import Spline from '@splinetool/react-spline/next';
+import { SplineScene } from '@/components/ui/splite';
 
 // --- Interfaces ---
 interface CrawlResponse {
@@ -406,105 +408,105 @@ func main() {
 // Renamed to lightMdxComponents and ensuring only light styles are present
 const lightMdxComponents: MDXComponentsType = {
   h1: (props: ComponentPropsWithoutRef<'h1'>) => (
-    <div className="group relative mb-14 mt-16">
-      <span className="absolute -left-8 top-3 hidden h-10 w-1.5 transform bg-gradient-to-b from-indigo-500 to-purple-500 opacity-80 transition-opacity duration-300 lg:block" />
+    <div className="group relative mt-16 mb-14">
+      <span className="hidden lg:block top-3 -left-8 absolute bg-gradient-to-b from-indigo-500 to-purple-500 opacity-80 w-1.5 h-10 transition-opacity duration-300 transform" />
       <h1
         // Use explicit light mode color, remove dark variant
-        className="font-serif scroll-m-20 text-4xl sm:text-5xl font-extrabold tracking-tight text-gray-900 mb-4"
+        className="mb-4 font-serif font-extrabold text-gray-900 text-4xl sm:text-5xl tracking-tight scroll-m-20"
         {...props}
       />
-      <div className="h-0.5 w-28 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full mt-4" />
+      <div className="bg-gradient-to-r from-indigo-500 to-purple-500 mt-4 rounded-full w-28 h-0.5" />
     </div>
   ),
   h2: (props: ComponentPropsWithoutRef<'h2'>) => (
-    <div className="group relative mb-10 mt-14">
-      <span className="absolute -left-6 top-2 hidden h-8 w-1 transform bg-gradient-to-b from-indigo-400 to-purple-400 opacity-70 transition-opacity duration-300 lg:block" />
+    <div className="group relative mt-14 mb-10">
+      <span className="hidden lg:block top-2 -left-6 absolute bg-gradient-to-b from-indigo-400 to-purple-400 opacity-70 w-1 h-8 transition-opacity duration-300 transform" />
       <h2
         // Use explicit light mode color, remove dark variant
-        className="font-serif scroll-m-20 pb-1 text-3xl font-semibold tracking-tight text-gray-900 first:mt-0"
+        className="first:mt-0 pb-1 font-serif font-semibold text-gray-900 text-3xl tracking-tight scroll-m-20"
         {...props}
       />
-      <div className="h-0.5 w-20 bg-gradient-to-r from-indigo-400/80 to-purple-400/80 rounded-full mt-3" />
+      <div className="bg-gradient-to-r from-indigo-400/80 to-purple-400/80 mt-3 rounded-full w-20 h-0.5" />
     </div>
   ),
   h3: (props: ComponentPropsWithoutRef<'h3'>) => (
     <h3
       // Use explicit light mode color, remove dark variant
-      className="font-serif scroll-m-20 text-2xl font-semibold tracking-tight text-gray-900 mt-12 mb-5"
+      className="mt-12 mb-5 font-serif font-semibold text-gray-900 text-2xl tracking-tight scroll-m-20"
       {...props}
     />
   ),
   h4: (props: ComponentPropsWithoutRef<'h4'>) => (
     <h4
       // Use explicit light mode color, remove dark variant
-      className="font-serif scroll-m-20 text-xl font-semibold tracking-tight text-gray-900 mt-10 mb-4"
+      className="mt-10 mb-4 font-serif font-semibold text-gray-900 text-xl tracking-tight scroll-m-20"
       {...props}
     />
   ),
   p: (props: ComponentPropsWithoutRef<'p'>) => (
     <p
       // Use explicit light mode color, remove dark variant
-      className="font-serif leading-8 [&:not(:first-child)]:mt-6 text-gray-900 text-lg"
+      className="[&:not(:first-child)]:mt-6 font-serif text-gray-900 text-lg leading-8"
       {...props}
     />
   ),
   a: (props: ComponentPropsWithoutRef<'a'>) => (
     <a
       // Use explicit light mode colors, remove dark variants
-      className="font-serif inline-flex items-center gap-1 font-medium text-indigo-600 underline underline-offset-4 decoration-indigo-500/40 hover:text-indigo-700 hover:decoration-indigo-600/60 transition-all"
+      className="inline-flex items-center gap-1 font-serif font-medium text-indigo-600 hover:text-indigo-700 decoration-indigo-500/40 hover:decoration-indigo-600/60 underline underline-offset-4 transition-all"
       target="_blank"
       rel="noopener noreferrer"
       {...props}
     >
       {props.children}
-      <ExternalLink className="w-3.5 h-3.5 opacity-80 shrink-0" />
+      <ExternalLink className="opacity-80 w-3.5 h-3.5 shrink-0" />
     </a>
   ),
   ul: (props: ComponentPropsWithoutRef<'ul'>) => (
     <ul
       // Use explicit light mode colors, remove dark variants
-      className="font-serif my-6 ml-6 list-disc [&>li]:mt-3 text-gray-900 marker:text-indigo-500 space-y-3"
+      className="space-y-3 my-6 [&>li]:mt-3 ml-6 font-serif text-gray-900 marker:text-indigo-500 list-disc"
       {...props}
     />
   ),
   ol: (props: ComponentPropsWithoutRef<'ol'>) => (
     <ol
       // Use explicit light mode colors, remove dark variants
-      className="font-serif my-6 ml-6 list-decimal [&>li]:mt-3 text-gray-900 marker:text-indigo-500 space-y-3"
+      className="space-y-3 my-6 [&>li]:mt-3 ml-6 font-serif text-gray-900 marker:text-indigo-500 list-decimal"
       {...props}
     />
   ),
   li: (props: ComponentPropsWithoutRef<'li'>) => (
     <li
       // Use explicit light mode color, remove dark variant
-      className="font-serif text-lg leading-relaxed pl-2 text-gray-900"
+      className="pl-2 font-serif text-gray-900 text-lg leading-relaxed"
       {...props}
     />
   ),
   code: (props: ComponentPropsWithoutRef<'code'>) => (
     <code
       // Use explicit light mode colors, remove dark variants
-      className="relative rounded-md bg-gray-50 px-[0.45rem] py-[0.2rem] font-mono text-sm font-medium text-indigo-700 border border-gray-200 shadow-sm"
+      className="relative bg-gray-50 shadow-sm px-[0.45rem] py-[0.2rem] border border-gray-200 rounded-md font-mono font-medium text-indigo-700 text-sm"
       {...props}
     />
   ),
   pre: (props: ComponentPropsWithoutRef<'pre'>) => (
-    <div className="relative my-10 group">
-      <div className="absolute -inset-x-4 -inset-y-3 z-0 rounded-xl bg-gray-50/90 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-      <div className="absolute right-3 top-3 z-20">
-        <button className="p-1.5 rounded-lg bg-white text-gray-700 hover:bg-gray-50 transition-colors backdrop-blur-sm border border-gray-200 shadow-sm">
+    <div className="group relative my-10">
+      <div className="z-0 absolute -inset-x-4 -inset-y-3 bg-gray-50/90 opacity-0 group-hover:opacity-100 rounded-xl transition-opacity duration-300" />
+      <div className="top-3 right-3 z-20 absolute">
+        <button className="bg-white hover:bg-gray-50 shadow-sm backdrop-blur-sm p-1.5 border border-gray-200 rounded-lg text-gray-700 transition-colors">
           <Copy className="w-4 h-4" />
         </button>
       </div>
-      <div className="relative z-10 rounded-lg overflow-hidden shadow-lg border border-gray-200">
-        <div className="h-8 bg-white flex items-center space-x-1.5 px-4 border-b border-gray-200">
-          <div className="w-2.5 h-2.5 rounded-full bg-red-400"></div>
-          <div className="w-2.5 h-2.5 rounded-full bg-amber-400"></div>
-          <div className="w-2.5 h-2.5 rounded-full bg-green-400"></div>
+      <div className="z-10 relative shadow-lg border border-gray-200 rounded-lg overflow-hidden">
+        <div className="flex items-center space-x-1.5 bg-white px-4 border-gray-200 border-b h-8">
+          <div className="bg-red-400 rounded-full w-2.5 h-2.5"></div>
+          <div className="bg-amber-400 rounded-full w-2.5 h-2.5"></div>
+          <div className="bg-green-400 rounded-full w-2.5 h-2.5"></div>
         </div>
         <pre
           // Use explicit light mode colors, remove dark variants
-          className="overflow-x-auto py-4 px-5 text-[0.9rem] leading-relaxed bg-white text-gray-900"
+          className="bg-white px-5 py-4 overflow-x-auto text-[0.9rem] text-gray-900 leading-relaxed"
           {...props}
         />
       </div>
@@ -513,7 +515,7 @@ const lightMdxComponents: MDXComponentsType = {
   blockquote: (props: ComponentPropsWithoutRef<'blockquote'>) => (
     <blockquote
       // Use explicit light mode colors, remove dark variants
-      className="mt-8 mb-8 bg-gray-50 pl-6 pr-4 py-5 italic text-lg text-gray-900 font-serif rounded-r-lg shadow-md border border-l-4 border-l-indigo-500 border-gray-100"
+      className="bg-gray-50 shadow-md mt-8 mb-8 py-5 pr-4 pl-6 border border-gray-100 border-l-4 border-l-indigo-500 rounded-r-lg font-serif text-gray-900 text-lg italic"
       {...props}
     />
   ),
@@ -525,17 +527,17 @@ const lightMdxComponents: MDXComponentsType = {
       img.classList.add("fallback-image");
     };
     return (
-      <figure className="my-12 relative group">
-        <div className="absolute -inset-2.5 bg-indigo-50/30 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10 blur-sm"></div>
+      <figure className="group relative my-12">
+        <div className="-z-10 absolute -inset-2.5 bg-indigo-50/30 opacity-0 group-hover:opacity-100 blur-sm rounded-xl transition-opacity duration-300"></div>
         <img
-          className="rounded-xl overflow-hidden shadow-lg border border-gray-200 w-full object-cover hover:shadow-indigo-100/50 transition-all duration-300 transform group-hover:scale-[1.01]"
+          className="shadow-lg hover:shadow-indigo-100/50 border border-gray-200 rounded-xl w-full object-cover overflow-hidden group-hover:scale-[1.01] transition-all duration-300 transform"
           loading="lazy"
           alt={props.alt || 'Image'}
           onError={handleError}
           {...props}
         />
         {props.alt && (
-          <figcaption className="mt-4 text-center text-sm text-gray-700 italic font-serif">
+          <figcaption className="mt-4 font-serif text-gray-700 text-sm text-center italic">
             {props.alt}
           </figcaption>
         )}
@@ -544,16 +546,16 @@ const lightMdxComponents: MDXComponentsType = {
   },
   hr: (props: ComponentPropsWithoutRef<'hr'>) => ( // Keep hr as is
     <div className="my-16 text-center">
-      <span className="inline-block w-1.5 h-1.5 rounded-full bg-gray-300 opacity-80 mx-1.5"></span>
-      <span className="inline-block w-1.5 h-1.5 rounded-full bg-gray-300 opacity-80 mx-1.5"></span>
-      <span className="inline-block w-1.5 h-1.5 rounded-full bg-gray-300 opacity-80 mx-1.5"></span>
+      <span className="inline-block bg-gray-300 opacity-80 mx-1.5 rounded-full w-1.5 h-1.5"></span>
+      <span className="inline-block bg-gray-300 opacity-80 mx-1.5 rounded-full w-1.5 h-1.5"></span>
+      <span className="inline-block bg-gray-300 opacity-80 mx-1.5 rounded-full w-1.5 h-1.5"></span>
     </div>
   ),
   table: (props: ComponentPropsWithoutRef<'table'>) => ( // Keep table wrapper as is
-    <div className="my-10 overflow-hidden rounded-xl shadow-lg border border-gray-200">
+    <div className="shadow-lg my-10 border border-gray-200 rounded-xl overflow-hidden">
       <div className="overflow-x-auto">
         <table
-          className="w-full border-collapse font-serif text-sm"
+          className="w-full font-serif text-sm border-collapse"
           {...props}
         />
       </div>
@@ -569,64 +571,64 @@ const lightMdxComponents: MDXComponentsType = {
   tbody: (props: ComponentPropsWithoutRef<'tbody'>) => (
     <tbody
       // Use explicit light mode colors, remove dark variant
-      className="divide-y divide-gray-100 font-serif text-gray-900 bg-white"
+      className="bg-white divide-y divide-gray-100 font-serif text-gray-900"
       {...props}
     />
   ),
   tr: (props: ComponentPropsWithoutRef<'tr'>) => (
     <tr
       // Use explicit light mode hover, remove dark variant
-      className="hover:bg-gray-50 transition-colors font-serif"
+      className="hover:bg-gray-50 font-serif transition-colors"
       {...props}
     />
   ),
   th: (props: ComponentPropsWithoutRef<'th'>) => (
     <th
       // Use explicit light mode color, remove dark variant
-      className="px-5 py-3.5 text-left font-semibold text-gray-900 font-serif tracking-wide"
+      className="px-5 py-3.5 font-serif font-semibold text-gray-900 text-left tracking-wide"
       {...props}
     />
   ),
   td: (props: ComponentPropsWithoutRef<'td'>) => (
     <td
       // Use explicit light mode color, remove dark variant
-      className="px-5 py-3.5 text-gray-900 align-top font-serif"
+      className="px-5 py-3.5 font-serif text-gray-900 align-top"
       {...props}
     />
   ),
   // Custom components - Ensure only light mode styles
   Note: ({ children }: { children: ReactNode }) => (
-    <div className="my-8 p-6 rounded-xl bg-blue-50 border border-blue-200 text-gray-900 font-serif shadow-lg relative overflow-hidden">
-      <div className="absolute top-0 right-0 w-32 h-32 transform translate-x-12 -translate-y-12 bg-blue-400/10 rounded-full blur-3xl pointer-events-none opacity-70" />
-      <div className="flex gap-4 relative z-10">
-        <div className="flex-shrink-0 w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 shadow-inner">
+    <div className="relative bg-blue-50 shadow-lg my-8 p-6 border border-blue-200 rounded-xl overflow-hidden font-serif text-gray-900">
+      <div className="top-0 right-0 absolute bg-blue-400/10 opacity-70 blur-3xl rounded-full w-32 h-32 -translate-y-12 translate-x-12 pointer-events-none transform" />
+      <div className="z-10 relative flex gap-4">
+        <div className="flex flex-shrink-0 justify-center items-center bg-blue-100 shadow-inner rounded-full w-10 h-10 text-blue-600">
           <Lightbulb className="w-5 h-5" />
         </div>
         <div>
-          <h4 className="text-base font-semibold mb-1.5 text-blue-700 uppercase tracking-wider">Note</h4>
-          <div className="text-lg leading-relaxed text-gray-900">{children}</div>
+          <h4 className="mb-1.5 font-semibold text-blue-700 text-base uppercase tracking-wider">Note</h4>
+          <div className="text-gray-900 text-lg leading-relaxed">{children}</div>
         </div>
       </div>
     </div>
   ),
   Warning: ({ children }: { children: ReactNode }) => (
-    <div className="my-8 p-6 rounded-xl bg-amber-50 border border-amber-200 text-gray-900 font-serif shadow-lg relative overflow-hidden">
-      <div className="absolute top-0 right-0 w-32 h-32 transform translate-x-12 -translate-y-12 bg-amber-400/10 rounded-full blur-3xl pointer-events-none opacity-70" />
-      <div className="flex gap-4 relative z-10">
-        <div className="flex-shrink-0 w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 shadow-inner">
+    <div className="relative bg-amber-50 shadow-lg my-8 p-6 border border-amber-200 rounded-xl overflow-hidden font-serif text-gray-900">
+      <div className="top-0 right-0 absolute bg-amber-400/10 opacity-70 blur-3xl rounded-full w-32 h-32 -translate-y-12 translate-x-12 pointer-events-none transform" />
+      <div className="z-10 relative flex gap-4">
+        <div className="flex flex-shrink-0 justify-center items-center bg-amber-100 shadow-inner rounded-full w-10 h-10 text-amber-600">
           <AlertTriangle className="w-5 h-5" />
         </div>
         <div>
-          <h4 className="text-base font-semibold mb-1.5 text-amber-700 uppercase tracking-wider">Warning</h4>
-          <div className="text-lg leading-relaxed text-gray-900">{children}</div>
+          <h4 className="mb-1.5 font-semibold text-amber-700 text-base uppercase tracking-wider">Warning</h4>
+          <div className="text-gray-900 text-lg leading-relaxed">{children}</div>
         </div>
       </div>
     </div>
   ),
   MDXFeature: ({ title, icon, children }: { title: string; icon: string; children: ReactNode }) => (
-    <div className="p-6 rounded-xl border border-gray-100 bg-white shadow-md hover:shadow-lg hover:shadow-indigo-100/40 transition-all duration-300 group transform hover:-translate-y-1">
+    <div className="group bg-white shadow-md hover:shadow-indigo-100/40 hover:shadow-lg p-6 border border-gray-100 rounded-xl transition-all hover:-translate-y-1 duration-300 transform">
       <div className="flex items-center gap-3 mb-4">
-        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-100 to-indigo-200/80 flex items-center justify-center text-indigo-600 shadow-inner group-hover:scale-105 transition-transform">
+        <div className="flex justify-center items-center bg-gradient-to-br from-indigo-100 to-indigo-200/80 shadow-inner rounded-lg w-10 h-10 text-indigo-600 group-hover:scale-105 transition-transform">
           {icon === 'heading' && <Hash className="w-5 h-5" />}
           {icon === 'text' && <Quote className="w-5 h-5" />}
           {icon === 'list' && <List className="w-5 h-5" />}
@@ -636,9 +638,9 @@ const lightMdxComponents: MDXComponentsType = {
           {icon === 'link' && <Link2 className="w-5 h-5" />}
           {icon === 'code' && <Code className="w-5 h-5" />}
         </div>
-        <h3 className="text-lg font-semibold text-gray-900 font-serif">{title}</h3>
+        <h3 className="font-serif font-semibold text-gray-900 text-lg">{title}</h3>
       </div>
-      <div className="text-gray-900 font-serif text-base leading-relaxed">
+      <div className="font-serif text-gray-900 text-base leading-relaxed">
         {children}
       </div>
     </div>
@@ -648,94 +650,94 @@ const lightMdxComponents: MDXComponentsType = {
 // --- Custom MDX Components (DARK MODE - FULL DEFINITION) ---
 const darkMdxComponents: MDXComponentsType = {
   h1: (props: ComponentPropsWithoutRef<'h1'>) => (
-    <div className="group relative mb-14 mt-16">
-      <span className="absolute -left-8 top-3 hidden h-10 w-1.5 transform bg-gradient-to-b from-indigo-500 to-purple-500 opacity-80 transition-opacity duration-300 lg:block" />
+    <div className="group relative mt-16 mb-14">
+      <span className="hidden lg:block top-3 -left-8 absolute bg-gradient-to-b from-indigo-500 to-purple-500 opacity-80 w-1.5 h-10 transition-opacity duration-300 transform" />
       <h1
-        className="font-serif scroll-m-20 text-4xl sm:text-5xl font-extrabold tracking-tight text-white mb-4" 
+        className="mb-4 font-serif font-extrabold text-white text-4xl sm:text-5xl tracking-tight scroll-m-20" 
         {...props}
       />
-      <div className="h-0.5 w-28 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full mt-4" />
+      <div className="bg-gradient-to-r from-indigo-500 to-purple-500 mt-4 rounded-full w-28 h-0.5" />
     </div>
   ),
   h2: (props: ComponentPropsWithoutRef<'h2'>) => (
-    <div className="group relative mb-10 mt-14">
-      <span className="absolute -left-6 top-2 hidden h-8 w-1 transform bg-gradient-to-b from-indigo-400 to-purple-400 opacity-70 transition-opacity duration-300 lg:block" />
+    <div className="group relative mt-14 mb-10">
+      <span className="hidden lg:block top-2 -left-6 absolute bg-gradient-to-b from-indigo-400 to-purple-400 opacity-70 w-1 h-8 transition-opacity duration-300 transform" />
       <h2
-        className="font-serif scroll-m-20 pb-1 text-3xl font-semibold tracking-tight text-white first:mt-0"
+        className="first:mt-0 pb-1 font-serif font-semibold text-white text-3xl tracking-tight scroll-m-20"
         {...props}
       />
-      <div className="h-0.5 w-20 bg-gradient-to-r from-indigo-400/80 to-purple-400/80 rounded-full mt-3" />
+      <div className="bg-gradient-to-r from-indigo-400/80 to-purple-400/80 mt-3 rounded-full w-20 h-0.5" />
     </div>
   ),
   h3: (props: ComponentPropsWithoutRef<'h3'>) => (
     <h3
-      className="font-serif scroll-m-20 text-2xl font-semibold tracking-tight text-white mt-12 mb-5"
+      className="mt-12 mb-5 font-serif font-semibold text-white text-2xl tracking-tight scroll-m-20"
       {...props}
     />
   ),
   h4: (props: ComponentPropsWithoutRef<'h4'>) => (
     <h4
-      className="font-serif scroll-m-20 text-xl font-semibold tracking-tight text-white mt-10 mb-4"
+      className="mt-10 mb-4 font-serif font-semibold text-white text-xl tracking-tight scroll-m-20"
       {...props}
     />
   ),
   p: (props: ComponentPropsWithoutRef<'p'>) => (
     <p
-      className="font-serif leading-8 [&:not(:first-child)]:mt-6 text-gray-300 text-lg"
+      className="[&:not(:first-child)]:mt-6 font-serif text-gray-300 text-lg leading-8"
       {...props}
     />
   ),
   a: (props: ComponentPropsWithoutRef<'a'>) => (
     <a
-      className="font-serif inline-flex items-center gap-1 font-medium text-indigo-400 underline underline-offset-4 decoration-indigo-400/40 hover:text-indigo-300 hover:decoration-indigo-400/60 transition-all"
+      className="inline-flex items-center gap-1 font-serif font-medium text-indigo-400 hover:text-indigo-300 decoration-indigo-400/40 hover:decoration-indigo-400/60 underline underline-offset-4 transition-all"
       target="_blank"
       rel="noopener noreferrer"
       {...props}
     >
       {props.children}
-      <ExternalLink className="w-3.5 h-3.5 opacity-80 shrink-0" />
+      <ExternalLink className="opacity-80 w-3.5 h-3.5 shrink-0" />
     </a>
   ),
   ul: (props: ComponentPropsWithoutRef<'ul'>) => (
     <ul
-      className="font-serif my-6 ml-6 list-disc [&>li]:mt-3 text-gray-300 marker:text-indigo-400 space-y-3"
+      className="space-y-3 my-6 [&>li]:mt-3 ml-6 font-serif text-gray-300 marker:text-indigo-400 list-disc"
       {...props}
     />
   ),
   ol: (props: ComponentPropsWithoutRef<'ol'>) => (
     <ol
-      className="font-serif my-6 ml-6 list-decimal [&>li]:mt-3 text-gray-300 marker:text-indigo-400 space-y-3"
+      className="space-y-3 my-6 [&>li]:mt-3 ml-6 font-serif text-gray-300 marker:text-indigo-400 list-decimal"
       {...props}
     />
   ),
   li: (props: ComponentPropsWithoutRef<'li'>) => (
     <li
-      className="font-serif text-lg leading-relaxed pl-2 text-gray-300"
+      className="pl-2 font-serif text-gray-300 text-lg leading-relaxed"
       {...props}
     />
   ),
   code: (props: ComponentPropsWithoutRef<'code'>) => (
     <code
-      className="relative rounded-md bg-gray-900/90 px-[0.45rem] py-[0.2rem] font-mono text-sm font-medium text-indigo-300 border border-gray-800/90 shadow-sm"
+      className="relative bg-gray-900/90 shadow-sm px-[0.45rem] py-[0.2rem] border border-gray-800/90 rounded-md font-mono font-medium text-indigo-300 text-sm"
       {...props}
     />
   ),
   pre: (props: ComponentPropsWithoutRef<'pre'>) => (
-    <div className="relative my-10 group">
-      <div className="absolute -inset-x-4 -inset-y-3 z-0 rounded-xl bg-indigo-950/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-      <div className="absolute right-3 top-3 z-20">
-        <button className="p-1.5 rounded-lg bg-black/90 text-gray-300 hover:bg-gray-900/90 transition-colors backdrop-blur-sm border border-gray-800/80 shadow-sm">
+    <div className="group relative my-10">
+      <div className="z-0 absolute -inset-x-4 -inset-y-3 bg-indigo-950/5 opacity-0 group-hover:opacity-100 rounded-xl transition-opacity duration-300" />
+      <div className="top-3 right-3 z-20 absolute">
+        <button className="bg-black/90 hover:bg-gray-900/90 shadow-sm backdrop-blur-sm p-1.5 border border-gray-800/80 rounded-lg text-gray-300 transition-colors">
           <Copy className="w-4 h-4" />
         </button>
       </div>
-      <div className="relative z-10 rounded-lg overflow-hidden shadow-lg border border-gray-800/90">
-        <div className="h-8 bg-black/90 flex items-center space-x-1.5 px-4 border-b border-gray-800/90">
-          <div className="w-2.5 h-2.5 rounded-full bg-red-500"></div>
-          <div className="w-2.5 h-2.5 rounded-full bg-amber-500"></div>
-          <div className="w-2.5 h-2.5 rounded-full bg-green-500"></div>
+      <div className="z-10 relative shadow-lg border border-gray-800/90 rounded-lg overflow-hidden">
+        <div className="flex items-center space-x-1.5 bg-black/90 px-4 border-gray-800/90 border-b h-8">
+          <div className="bg-red-500 rounded-full w-2.5 h-2.5"></div>
+          <div className="bg-amber-500 rounded-full w-2.5 h-2.5"></div>
+          <div className="bg-green-500 rounded-full w-2.5 h-2.5"></div>
         </div>
         <pre
-          className="overflow-x-auto py-4 px-5 text-[0.9rem] leading-relaxed bg-black text-gray-100"
+          className="bg-black px-5 py-4 overflow-x-auto text-[0.9rem] text-gray-100 leading-relaxed"
           {...props}
         />
       </div>
@@ -743,7 +745,7 @@ const darkMdxComponents: MDXComponentsType = {
   ),
   blockquote: (props: ComponentPropsWithoutRef<'blockquote'>) => (
     <blockquote
-      className="mt-8 mb-8 bg-indigo-950/5 pl-6 pr-4 py-5 italic text-lg text-gray-200 font-serif rounded-r-lg shadow-md border border-l-4 border-l-indigo-400 border-gray-900/90"
+      className="bg-indigo-950/5 shadow-md mt-8 mb-8 py-5 pr-4 pl-6 border border-gray-900/90 border-l-4 border-l-indigo-400 rounded-r-lg font-serif text-gray-200 text-lg italic"
       {...props}
     />
   ),
@@ -755,17 +757,17 @@ const darkMdxComponents: MDXComponentsType = {
       img.classList.add("fallback-image");
     };
     return (
-      <figure className="my-12 relative group">
-        <div className="absolute -inset-2.5 bg-indigo-900/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10 blur-sm"></div>
+      <figure className="group relative my-12">
+        <div className="-z-10 absolute -inset-2.5 bg-indigo-900/5 opacity-0 group-hover:opacity-100 blur-sm rounded-xl transition-opacity duration-300"></div>
         <img
-          className="rounded-xl overflow-hidden shadow-lg border border-gray-800/80 w-full object-cover hover:shadow-indigo-900/20 transition-all duration-300 transform group-hover:scale-[1.01]" // Adjusted border/shadow for dark
+          className="shadow-lg hover:shadow-indigo-900/20 border border-gray-800/80 rounded-xl w-full object-cover overflow-hidden group-hover:scale-[1.01] transition-all duration-300 transform" // Adjusted border/shadow for dark
           loading="lazy"
           alt={props.alt || 'Image'}
           onError={handleError}
           {...props}
         />
         {props.alt && (
-          <figcaption className="mt-4 text-center text-sm text-gray-400 italic font-serif"> {/* Adjusted text color */}
+          <figcaption className="mt-4 font-serif text-gray-400 text-sm text-center italic"> {/* Adjusted text color */}
             {props.alt}
           </figcaption>
         )}
@@ -774,16 +776,16 @@ const darkMdxComponents: MDXComponentsType = {
   },
   hr: (props: ComponentPropsWithoutRef<'hr'>) => ( // Use dark mode dot color
     <div className="my-16 text-center">
-      <span className="inline-block w-1.5 h-1.5 rounded-full bg-indigo-700 opacity-80 mx-1.5"></span>
-      <span className="inline-block w-1.5 h-1.5 rounded-full bg-indigo-700 opacity-80 mx-1.5"></span>
-      <span className="inline-block w-1.5 h-1.5 rounded-full bg-indigo-700 opacity-80 mx-1.5"></span>
+      <span className="inline-block bg-indigo-700 opacity-80 mx-1.5 rounded-full w-1.5 h-1.5"></span>
+      <span className="inline-block bg-indigo-700 opacity-80 mx-1.5 rounded-full w-1.5 h-1.5"></span>
+      <span className="inline-block bg-indigo-700 opacity-80 mx-1.5 rounded-full w-1.5 h-1.5"></span>
     </div>
   ),
   table: (props: ComponentPropsWithoutRef<'table'>) => ( // Adjust wrapper border
-    <div className="my-10 overflow-hidden rounded-xl shadow-lg border border-gray-800/90">
+    <div className="shadow-lg my-10 border border-gray-800/90 rounded-xl overflow-hidden">
       <div className="overflow-x-auto">
         <table
-          className="w-full border-collapse font-serif text-sm"
+          className="w-full font-serif text-sm border-collapse"
           {...props}
         />
       </div>
@@ -797,61 +799,61 @@ const darkMdxComponents: MDXComponentsType = {
   ),
   tbody: (props: ComponentPropsWithoutRef<'tbody'>) => (
     <tbody
-      className="divide-y divide-gray-800/80 font-serif text-gray-300 bg-black/70"
+      className="bg-black/70 divide-y divide-gray-800/80 font-serif text-gray-300"
       {...props}
     />
   ),
   tr: (props: ComponentPropsWithoutRef<'tr'>) => (
     <tr
-      className="hover:bg-gray-900/70 transition-colors font-serif"
+      className="hover:bg-gray-900/70 font-serif transition-colors"
       {...props}
     />
   ),
   th: (props: ComponentPropsWithoutRef<'th'>) => (
     <th
-      className="px-5 py-3.5 text-left font-semibold text-white font-serif tracking-wide"
+      className="px-5 py-3.5 font-serif font-semibold text-white text-left tracking-wide"
       {...props}
     />
   ),
   td: (props: ComponentPropsWithoutRef<'td'>) => (
     <td
-      className="px-5 py-3.5 text-gray-200 align-top font-serif"
+      className="px-5 py-3.5 font-serif text-gray-200 align-top"
       {...props}
     />
   ),
   // Custom components - Dark mode styles
   Note: ({ children }: { children: ReactNode }) => (
-    <div className="my-8 p-6 rounded-xl bg-blue-950/10 border border-blue-900/40 text-blue-200 font-serif shadow-lg relative overflow-hidden">
-      <div className="absolute top-0 right-0 w-32 h-32 transform translate-x-12 -translate-y-12 bg-blue-500/10 rounded-full blur-3xl pointer-events-none opacity-70" />
-      <div className="flex gap-4 relative z-10">
-        <div className="flex-shrink-0 w-10 h-10 rounded-full bg-blue-900/50 flex items-center justify-center text-blue-300 shadow-inner">
+    <div className="relative bg-blue-950/10 shadow-lg my-8 p-6 border border-blue-900/40 rounded-xl overflow-hidden font-serif text-blue-200">
+      <div className="top-0 right-0 absolute bg-blue-500/10 opacity-70 blur-3xl rounded-full w-32 h-32 -translate-y-12 translate-x-12 pointer-events-none transform" />
+      <div className="z-10 relative flex gap-4">
+        <div className="flex flex-shrink-0 justify-center items-center bg-blue-900/50 shadow-inner rounded-full w-10 h-10 text-blue-300">
           <Lightbulb className="w-5 h-5" />
         </div>
         <div>
-          <h4 className="text-base font-semibold mb-1.5 text-blue-100 uppercase tracking-wider">Note</h4>
-          <div className="text-lg leading-relaxed text-blue-200/90">{children}</div>
+          <h4 className="mb-1.5 font-semibold text-blue-100 text-base uppercase tracking-wider">Note</h4>
+          <div className="text-blue-200/90 text-lg leading-relaxed">{children}</div>
         </div>
       </div>
     </div>
   ),
   Warning: ({ children }: { children: ReactNode }) => (
-    <div className="my-8 p-6 rounded-xl bg-amber-950/10 border border-amber-900/40 text-amber-100 font-serif shadow-lg relative overflow-hidden">
-      <div className="absolute top-0 right-0 w-32 h-32 transform translate-x-12 -translate-y-12 bg-amber-500/10 rounded-full blur-3xl pointer-events-none opacity-70" />
-      <div className="flex gap-4 relative z-10">
-        <div className="flex-shrink-0 w-10 h-10 rounded-full bg-amber-900/50 flex items-center justify-center text-amber-300 shadow-inner">
+    <div className="relative bg-amber-950/10 shadow-lg my-8 p-6 border border-amber-900/40 rounded-xl overflow-hidden font-serif text-amber-100">
+      <div className="top-0 right-0 absolute bg-amber-500/10 opacity-70 blur-3xl rounded-full w-32 h-32 -translate-y-12 translate-x-12 pointer-events-none transform" />
+      <div className="z-10 relative flex gap-4">
+        <div className="flex flex-shrink-0 justify-center items-center bg-amber-900/50 shadow-inner rounded-full w-10 h-10 text-amber-300">
           <AlertTriangle className="w-5 h-5" />
         </div>
         <div>
-          <h4 className="text-base font-semibold mb-1.5 text-amber-100 uppercase tracking-wider">Warning</h4>
-          <div className="text-lg leading-relaxed text-amber-200/90">{children}</div>
+          <h4 className="mb-1.5 font-semibold text-amber-100 text-base uppercase tracking-wider">Warning</h4>
+          <div className="text-amber-200/90 text-lg leading-relaxed">{children}</div>
         </div>
       </div>
     </div>
   ),
   MDXFeature: ({ title, icon, children }: { title: string; icon: string; children: ReactNode }) => (
-    <div className="p-6 rounded-xl border border-gray-800/80 bg-black/90 shadow-md hover:shadow-lg hover:shadow-indigo-950/20 transition-all duration-300 group transform hover:-translate-y-1">
+    <div className="group bg-black/90 shadow-md hover:shadow-indigo-950/20 hover:shadow-lg p-6 border border-gray-800/80 rounded-xl transition-all hover:-translate-y-1 duration-300 transform">
       <div className="flex items-center gap-3 mb-4">
-        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-900/50 to-indigo-800/40 flex items-center justify-center text-indigo-300 shadow-inner group-hover:scale-105 transition-transform">
+        <div className="flex justify-center items-center bg-gradient-to-br from-indigo-900/50 to-indigo-800/40 shadow-inner rounded-lg w-10 h-10 text-indigo-300 group-hover:scale-105 transition-transform">
           {icon === 'heading' && <Hash className="w-5 h-5" />}
           {icon === 'text' && <Quote className="w-5 h-5" />}
           {icon === 'list' && <List className="w-5 h-5" />}
@@ -861,9 +863,9 @@ const darkMdxComponents: MDXComponentsType = {
           {icon === 'link' && <Link2 className="w-5 h-5" />}
           {icon === 'code' && <Code className="w-5 h-5" />}
         </div>
-        <h3 className="text-lg font-semibold text-white font-serif">{title}</h3>
+        <h3 className="font-serif font-semibold text-white text-lg">{title}</h3>
       </div>
-      <div className="text-gray-300 font-serif text-base leading-relaxed">
+      <div className="font-serif text-gray-300 text-base leading-relaxed">
         {children}
       </div>
     </div>
@@ -1074,21 +1076,23 @@ export default function Home() {
   const syntaxHighlighterStyle = isDarkMode ? vs2015 : github;
 
   return (
+    <main>
+      
     <div className={`min-h-screen font-serif antialiased transition-colors duration-300 ${isDarkMode ? 'dark bg-black' : 'light bg-white'}`}>
       <div className={`fixed inset-0 z-[-1] ${isDarkMode ? 'bg-gradient-to-br from-black via-purple-950/5 to-blue-950/10 opacity-90' : 'bg-white'}`} />
 
       <header className={`sticky top-0 z-40 w-full backdrop-blur-lg border-b ${isDarkMode ? 'bg-black/70 border-gray-800/50' : 'bg-white/90 border-gray-100'}`}>
         <MotionContainer
           animation="fadeInUp"
-          className="container mx-auto px-6 h-20 flex items-center justify-between"
+          className="flex justify-between items-center mx-auto px-6 h-20 container"
         >
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+            <div className="flex justify-center items-center bg-gradient-to-br from-indigo-500 to-purple-600 shadow-indigo-500/20 shadow-lg rounded-lg w-10 h-10">
               <FileCode className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xl font-serif tracking-tight">
+            <span className="font-serif text-xl tracking-tight">
               <span className={`font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>MDX</span>
-              <span className="text-indigo-600 dark:text-indigo-400 font-medium">Converter</span>
+              <span className="font-medium text-indigo-600 dark:text-indigo-400">Converter</span>
             </span>
           </div>
           <div className="flex items-center gap-3">
@@ -1097,9 +1101,13 @@ export default function Home() {
               aria-label="Toggle theme"
               className={`p-2.5 rounded-full group relative overflow-hidden focus:outline-none transition-colors ${isDarkMode ? 'text-gray-300 hover:bg-gray-900' : 'text-gray-600 hover:bg-gray-100'}`}
             >
-              <div className="relative z-10">
-                {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-              </div>
+             <div className="z-10 relative">
+  {isDarkMode ? (
+    <span className="text-2xl"> ☀️</span>
+  ) : (
+    <span className="text-2xl">🌙</span>
+  )}
+</div>
             </button>
             <a
               href="https://github.com/yourusername/mdx-converter"
@@ -1108,21 +1116,38 @@ export default function Home() {
               aria-label="GitHub Repository"
               className={`p-2.5 rounded-full focus:outline-none transition-colors ${isDarkMode ? 'text-gray-300 hover:bg-gray-900' : 'text-gray-600 hover:bg-gray-100'}`}
             >
-              <Github className="w-5 h-5" />
+             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" id="github" className="w-8 h-8">
+  <path fill={isDarkMode ? "#ffffff" : "#00020c"} fill-rule="evenodd" d="m60,12c0-4.42-3.58-8-8-8H12c-4.42,0-8,3.58-8,8v40c0,4.42,3.58,8,8,8h40c4.42,0,8-3.58,8-8V12h0Z"></path>
+  <path fill={isDarkMode ? "#00020c" : "#ffffff"} fill-rule="evenodd" d="m26.73,47.67c0,1.1-.01,2.3-.01,3.4,0,.26-.13.51-.34.67-.21.16-.49.2-.74.13-8.4-2.7-14.49-10.58-14.49-19.87,0-11.51,9.34-20.85,20.85-20.85s20.85,9.34,20.85,20.85c0,9.28-6.08,17.15-14.46,19.85-.25.08-.53.03-.74-.13-.21-.16-.34-.4-.34-.67-.02-2.45-.03-5.34-.03-6.65s-1.28-2.39-1.28-2.39c0,0,9.45-1.16,9.45-9.34,0-5.19-2.06-6.94-2.06-6.94.44-1.86.38-3.63-.1-5.31-.07-.24-.31-.4-.56-.38-2.01.18-3.85.91-5.52,2.24,0,0-2.95-.81-5.2-.81h0c-2.25,0-5.2.81-5.2.81-1.67-1.32-3.52-2.06-5.52-2.24-.25-.02-.49.14-.56.38-.48,1.68-.54,3.45-.11,5.31,0,0-2.05,1.75-2.05,6.94,0,8.18,9.45,9.34,9.45,9.34,0,0-1.28,1.08-1.28,2.39v.3c-.72.26-1.7.5-2.8.43-2.99-.2-3.39-3.42-4.62-3.94-.9-.38-1.78-.43-2.45-.37-.2.02-.36.16-.41.35-.05.19.02.39.18.51.81.55,1.89,1.33,2.19,1.9.81,1.52,2.06,3.93,3.67,4.19,1.96.32,3.36.13,4.25-.12h0Z"></path>
+</svg>
             </a>
           </div>
         </MotionContainer>
       </header>
 
-      <main className="container mx-auto px-6 py-12 sm:py-20 max-w-7xl">
+      <main className="mx-auto px-6 py-12 sm:py-20 max-w-7xl container">
+    
 
         <MotionContainer
           animation="stagger"
-          className="mb-20 sm:mb-32 text-center"
+          className="mb-20 sm:mb-32 text-center relative" // Parent needs to be relative
         >
+             {/* Spline Container - Make it absolute and behind */}
+             <div className="absolute inset-0 z-0">
+           <SplineScene 
+             // Conditionally set the scene based on the theme
+             scene={isDarkMode 
+               ? "https://prod.spline.design/vsaphMWTFpDw8RsO/scene.splinecode" // Dark mode scene
+               : "https://prod.spline.design/a-X-XpK4S2NGpwdR/scene.splinecode" // Light mode scene
+             }
+             className="w-full h-full" // Ensure it fills the container
+           />
+           </div>
+         
+          {/* Text Content Container 1 - Make it relative and on top */}
           <MotionContainer
             animation="fadeInUp"
-            className={`inline-block mb-4 px-4 py-2 rounded-full font-medium text-sm ${isDarkMode ? 'bg-indigo-900/30 text-indigo-300' : 'bg-indigo-50 text-indigo-700'}`}
+            className={`relative z-10 inline-block mb-4 px-4 py-2 rounded-full font-medium text-sm ${isDarkMode ? 'bg-indigo-900/30 text-indigo-300' : 'bg-indigo-50 text-indigo-700'}`}
           >
             <span className="flex items-center gap-1.5">
               <Sparkles className="w-4 h-4" />
@@ -1130,24 +1155,27 @@ export default function Home() {
             </span>
           </MotionContainer>
 
+          {/* Text Content Container 2 - Make it relative and on top */}
           <MotionContainer
             animation="fadeInUp"
-            className={`text-4xl sm:text-5xl md:text-6xl font-bold mb-6 font-serif tracking-tight max-w-4xl mx-auto leading-tight ${isDarkMode ? 'text-white' : 'text-gray-950'}`}
+            className={`relative z-10 text-4xl sm:text-5xl md:text-6xl font-bold mb-6 font-serif tracking-tight max-w-4xl mx-auto leading-tight ${isDarkMode ? 'text-white' : 'text-gray-950'}`}
           >
-            Transform Web Content into
-            <span className="bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent"> Beautiful MDX</span>
+     From URL to  NO BS 
+            <span className="block bg-clip-text bg-gradient-to-r from-indigo-600 dark:from-indigo-400 via-purple-600 to-blue-500 dark:to-purple-400 text-transparent">LLM-Ready Markdown in Seconds. </span>
           </MotionContainer>
 
+          {/* Text Content Container 3 - Make it relative and on top */}
           <MotionContainer
             animation="fadeInUp"
-            className={`text-xl md:text-2xl max-w-3xl mx-auto mb-10 leading-relaxed font-serif ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}
+            className={`relative z-10 text-xl md:text-2xl max-w-3xl mx-auto mb-10 leading-relaxed font-serif ${isDarkMode ? 'text-gray-50' : 'text-gray-700'}`}
           >
-            Paste a URL, hit crawl, and get beautifully formatted MDX instantly. Perfect for documentation, blogs, and content migration.
+          Crawl and scrape 1000+ websites in under 2 minutes with our Rust crawler, Built for speed, low latency, and extreme scalability.
           </MotionContainer>
 
+          {/* Text Content Container 4 - Make it relative and on top */}
           <MotionContainer
             animation="fadeInUp"
-            className="flex flex-wrap justify-center gap-4 mb-10"
+            className="relative z-10 flex flex-wrap justify-center gap-4 mb-10"
           >
             {[
               { icon: <Zap className="w-4 h-4" />, text: "Lightning Fast" },
@@ -1165,12 +1193,13 @@ export default function Home() {
             ))}
           </MotionContainer>
 
+          {/* Divider - Make it relative and on top */}
           <MotionContainer
             animation="fadeIn"
             delay={0.4}
-            className="max-w-md mx-auto"
+            className="relative z-10 mx-auto max-w-md" // Added relative z-10 here too
           >
-            <div className="h-1.5 w-36 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full mx-auto mb-8 opacity-70" />
+            <div className="bg-gradient-to-r from-indigo-500 to-purple-500 opacity-70 mx-auto mb-8 rounded-full w-36 h-1.5" />
           </MotionContainer>
         </MotionContainer>
 
@@ -1192,7 +1221,7 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="p-8 space-y-6">
+            <div className="space-y-6 p-8">
               <div className="space-y-2">
                 <label htmlFor="apiUrlInput" className={`text-sm font-medium mb-1.5 flex items-center gap-1.5 ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
                   <Server className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
@@ -1229,8 +1258,8 @@ export default function Home() {
                 <p className={`text-sm pl-1 font-serif ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Enter the starting URLs for crawling.</p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-                <div className="md:col-span-1 space-y-2">
+              <div className="items-end gap-4 grid grid-cols-1 md:grid-cols-4">
+                <div className="space-y-2 md:col-span-1">
                    <label htmlFor="maxDepthInput" className={`text-sm font-medium mb-1.5 flex items-center gap-1.5 ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
                      <Layers className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
                      Max Depth
@@ -1284,10 +1313,10 @@ export default function Home() {
           {isCrawling && !error && !crawlData && (
             <MotionContainer
               animation="fadeIn"
-              className="flex flex-col items-center justify-center py-20 text-center"
+              className="flex flex-col justify-center items-center py-20 text-center"
             >
-              <div className="relative w-20 h-20 mb-6">
-                <div className="absolute inset-0 rounded-full border-t-4 border-indigo-500 animate-spin"></div>
+              <div className="relative mb-6 w-20 h-20">
+                <div className="absolute inset-0 border-indigo-500 border-t-4 rounded-full animate-spin"></div>
                 <div className={`absolute inset-3 rounded-full flex items-center justify-center ${isDarkMode ? 'bg-black' : 'bg-white'}`}>
                   <Loader2 className="w-8 h-8 text-indigo-500 animate-pulse" />
                 </div>
@@ -1365,11 +1394,11 @@ export default function Home() {
                       </h3>
                     </div>
                     <div className="p-6">
-                      <div className="font-mono text-sm p-5 rounded-xl bg-gray-50 dark:bg-gray-900/70 text-gray-700 dark:text-gray-300 max-h-80 overflow-y-auto shadow-inner leading-relaxed scrollbar-thin">
+                      <div className="bg-gray-50 dark:bg-gray-900/70 shadow-inner p-5 rounded-xl max-h-80 overflow-y-auto font-mono text-gray-700 dark:text-gray-300 text-sm leading-relaxed scrollbar-thin">
                         {crawlData.logs.map((log, i) => (
                           <div key={i} className="flex mb-1.5 last:mb-0">
-                            <span className="text-indigo-500 dark:text-indigo-400 mr-2 select-none flex-shrink-0">$</span>
-                            <span className="break-words flex-grow">{log}</span>
+                            <span className="flex-shrink-0 mr-2 text-indigo-500 dark:text-indigo-400 select-none">$</span>
+                            <span className="flex-grow break-words">{log}</span>
                           </div>
                         ))}
                       </div>
@@ -1392,60 +1421,70 @@ export default function Home() {
                    <p className={`font-serif text-lg max-w-2xl mx-auto ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                      Below is the web content converted into MDX format, ready to use.
                    </p>
-                   <div className="h-0.5 w-24 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full mx-auto mt-5 opacity-70" />
+                   <div className="bg-gradient-to-r from-indigo-500 to-purple-500 opacity-70 mx-auto mt-5 rounded-full w-24 h-0.5" />
                 </div>
 
                 {renderedMdx.length > 0 ? (
                   <div className="space-y-12">
                     {renderedMdx.map((item, index) => (
-                      <MotionContainer
-                        key={`${item.url}-${index}`}
-                        animation="fadeInUp"
-                        delay={0.4 + index * 0.15}
-                        className={`rounded-2xl shadow-lg border overflow-hidden transition-all duration-300 ${
-                          isDarkMode 
-                            ? 'bg-black border-gray-800/90 shadow-indigo-950/10 hover:border-indigo-800/60 hover:shadow-indigo-950/20' 
-                            : 'bg-white border-gray-100 shadow-indigo-100/20 hover:border-indigo-200/70 hover:shadow-indigo-100/40'
-                        }`}
-                      >
-                        <div className={`p-6 border-b ${ isDarkMode ? 'border-gray-800/90 bg-gradient-to-b from-black to-gray-950/70' : 'border-gray-100 bg-gradient-to-b from-white to-gray-50/70'}`}>
-                          <div className="mb-5">
-                             <div className="flex items-center gap-2 mb-2">
-                               <div className={`w-6 h-6 rounded-md flex items-center justify-center shadow-sm ${ isDarkMode ? 'bg-indigo-900/50 text-indigo-300' : 'bg-indigo-50 text-indigo-700' }`}>
+                        <MotionContainer
+                          key={`${item.url}-${index}`}
+                          animation="fadeInUp"
+                          delay={0.4 + index * 0.15}
+                          className={`rounded-2xl shadow-lg border overflow-hidden transition-all duration-300 ${
+                            isDarkMode 
+                              ? 'bg-black border-gray-800/90 shadow-indigo-950/10 hover:border-indigo-800/60 hover:shadow-indigo-950/20' 
+                              : 'bg-white border-gray-100 shadow-indigo-100/20 hover:border-indigo-200/70 hover:shadow-indigo-100/40'
+                          }`}
+                        >
+                          {/* Item Header: URL and Metadata */}
+                          <div className={`p-6 border-b ${ isDarkMode ? 'border-gray-800/90 bg-gradient-to-b from-black to-gray-950/70' : 'border-gray-100 bg-gradient-to-b from-white to-gray-50/70'}`}>
+                            {/* Source URL (Keep as is) */}
+                            <div className="mb-5">
+                              <div className="flex items-center gap-2 mb-2">
+                                <div className={`w-6 h-6 rounded-md flex items-center justify-center shadow-sm ${ isDarkMode ? 'bg-indigo-900/50 text-indigo-300' : 'bg-indigo-50 text-indigo-700' }`}>
                                   <Globe className="w-3.5 h-3.5" />
                                 </div>
-                               <span className={`text-xs font-semibold uppercase tracking-wider ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Source URL</span>
+                                <span className={`text-xs font-semibold uppercase tracking-wider ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Source URL</span>
                               </div>
                               <a
                                 href={item.url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                               className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 hover:underline font-medium font-serif flex items-center gap-1.5 break-all transition-colors text-base"
+                                className="flex items-center gap-1.5 font-serif font-medium text-indigo-600 hover:text-indigo-700 dark:hover:text-indigo-300 dark:text-indigo-400 text-base hover:underline break-all transition-colors"
                               >
                                 {item.url}
-                                <ExternalLink className="w-3.5 h-3.5 opacity-70 shrink-0" />
+                                <ExternalLink className="opacity-70 w-3.5 h-3.5 shrink-0" />
                               </a>
                             </div>
 
-                            {Object.keys(item.frontmatter).length > 0 && (
-                              <div>
+                          {/* Frontmatter (Metadata) - Conditional Rendering */}
+                            <div>
                               <div className="flex items-center gap-2 mb-2">
                                 <div className={`w-6 h-6 rounded-md flex items-center justify-center shadow-sm ${ isDarkMode ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-700' }`}>
-                                    <TableIcon className="w-3.5 h-3.5" />
-                                  </div>
+                                  <TableIcon className="w-3.5 h-3.5" />
+                                </div>
                                 <span className={`text-xs font-semibold uppercase tracking-wider ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Metadata</span>
-                                </div>
-                              <div className={`rounded-lg border p-4 max-h-48 overflow-y-auto scrollbar-thin text-xs font-mono ${ isDarkMode ? 'bg-black/50 border-gray-800 scrollbar-thumb-gray-700' : 'bg-white/80 border-gray-100 scrollbar-thumb-gray-200' }`}>
-                                <pre className="whitespace-pre-wrap break-all">
-                                  {JSON.stringify(item.frontmatter, null, 2)}
-                                </pre>
-                                </div>
+                              </div>
+                            {Object.keys(item.frontmatter).length > 0 ? (
+                              // Render the metadata table if frontmatter is not empty
+                                  <div className={`rounded-lg border p-4 max-h-48 overflow-y-auto scrollbar-thin text-xs font-mono ${ isDarkMode ? 'bg-black/50 border-gray-800 scrollbar-thumb-gray-700' : 'bg-white/80 border-gray-100 scrollbar-thumb-gray-200' }`}>
+                                    <pre className="break-all whitespace-pre-wrap">
+                                      {JSON.stringify(item.frontmatter, null, 2)}
+                                    </pre>
+                                  </div>
+                            ) : (
+                              // Render "Not Found" message if frontmatter is empty
+                              <div className={`rounded-lg border border-dashed p-4 text-center ${ isDarkMode ? 'bg-black/30 border-gray-700/80 text-gray-500' : 'bg-white/60 border-gray-200/90 text-gray-400' }`}>
+                                <span className="font-serif text-sm italic">🤷‍♂️ No metadata (title, description, etc.) found on this page.</span>
                               </div>
                             )}
+                          </div>
                         </div>
                         
+                        {/* MDX Content Body (Keep as is) */}
                         <div className={`px-6 sm:px-8 md:px-10 py-10 ${isDarkMode ? 'bg-black' : 'bg-white'}`}>
-                           <div className="mdx-content max-w-none"> 
+                           <div className="max-w-none mdx-content"> 
                               <MDXRemote
                                 {...item.mdxSource}
                               components={componentsToUse}
@@ -1464,7 +1503,7 @@ export default function Home() {
                   >
                       <div className="flex flex-col items-center py-10">
                         <div className={`relative w-20 h-20 mb-6 flex items-center justify-center`}>
-                        <div className="absolute inset-0 rounded-full bg-gradient-to-r from-indigo-100 to-purple-100 dark:from-indigo-900/20 dark:to-purple-900/20 opacity-60 dark:opacity-30 blur-lg"></div>
+                        <div className="absolute inset-0 bg-gradient-to-r from-indigo-100 dark:from-indigo-900/20 to-purple-100 dark:to-purple-900/20 opacity-60 dark:opacity-30 blur-lg rounded-full"></div>
                         <div className={`relative z-10 w-16 h-16 rounded-full flex items-center justify-center drop-shadow-sm border ${isDarkMode ? 'bg-gray-900 text-gray-400 border-gray-700' : 'bg-white text-gray-500 border-gray-100'}`}>
                             <FileCode className="w-8 h-8" />
                           </div>
@@ -1493,13 +1532,13 @@ export default function Home() {
               <h2 className={`text-2xl font-bold mb-2 font-serif flex items-center gap-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isDarkMode ? 'bg-indigo-900/40 text-indigo-300' : 'bg-indigo-50 text-indigo-700'}`}>
                   <Code className="w-4 h-4" />
-                </div>
+                                   </div>
                 API Integration Examples
               </h2>
               <p className={`font-serif text-lg ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                 Integrate the MDX converter into your projects with these code snippets
-              </p>
-            </div>
+                                      </p>
+                                   </div>
 
             <div className={`${isDarkMode ? 'bg-gray-900/50' : 'bg-white'} px-8 py-1`}>
               <div className={`flex overflow-x-auto scrollbar-thin space-x-1 sm:space-x-2 ${isDarkMode ? 'scrollbar-thumb-gray-700' : 'scrollbar-thumb-gray-200'}`}>
@@ -1527,7 +1566,7 @@ export default function Home() {
 
             <div className={`relative p-6 ${isDarkMode ? 'bg-black' : 'bg-white'}`}>
               <div className={`relative rounded-xl overflow-hidden shadow-sm border ${isDarkMode ? 'border-gray-800' : 'border-gray-100'}`}>
-                <div className="absolute top-3 right-3 z-10 flex space-x-2">
+                <div className="top-3 right-3 z-10 absolute flex space-x-2">
                   <button
                     onClick={copyCodeToClipboard}
                     aria-label="Copy code snippet"
@@ -1571,15 +1610,15 @@ export default function Home() {
       </main>
 
       <footer className={`border-t backdrop-blur-lg ${isDarkMode ? 'border-gray-800 bg-black/50' : 'border-gray-100 bg-white/80'}`}>
-        <div className="container mx-auto px-6 py-12">
-          <div className="flex flex-col items-center justify-between md:flex-row">
+        <div className="mx-auto px-6 py-12 container">
+          <div className="flex md:flex-row flex-col justify-between items-center">
             <div className="flex items-center gap-3 mb-6 md:mb-0">
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+              <div className="flex justify-center items-center bg-gradient-to-br from-indigo-500 to-purple-600 shadow-indigo-500/20 shadow-lg rounded-lg w-10 h-10">
                 <FileCode className="w-5 h-5 text-white" />
               </div>
-              <span className="text-xl font-serif tracking-tight">
+              <span className="font-serif text-xl tracking-tight">
                 <span className={`font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>MDX</span>
-                <span className="text-indigo-600 dark:text-indigo-400 font-medium">Converter</span>
+                <span className="font-medium text-indigo-600 dark:text-indigo-400">Converter</span>
               </span>
             </div>
 
@@ -1603,5 +1642,6 @@ export default function Home() {
         )}
       </AnimatePresence>
     </div>
+    </main>
   );
 }
