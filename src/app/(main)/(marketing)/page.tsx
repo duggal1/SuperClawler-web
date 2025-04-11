@@ -26,6 +26,7 @@ import Spline from '@splinetool/react-spline/next';
 import { SplineScene } from '@/components/ui/splite';
 import IntegrationsSection from '@/components/integrations-7';
 import SuperCrawlers from '@/components/integrations-1';
+import  ChartSuperCrawler  from '@/components/charts/super-crawler/charts';
 
 // --- Interfaces ---
 interface CrawlResponse {
@@ -1615,6 +1616,7 @@ export default function Home() {
 <div className="-mt-16">
      <IntegrationsSection/>
      </div>
+<ChartSuperCrawler/>
 
       <AnimatePresence>
         {showCopySnackbar && (
