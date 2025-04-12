@@ -4,13 +4,14 @@ import Image from "next/image";
 import { Button } from "../ui/button";
 import AnimationContainer from "../Contaniers/global-motion";
 import { Particles } from "../magicui/particles";
+import { AuroraText } from "../magicui/aurora-text";
 
 
 const Footer = () => {
     return (
-        <footer className="w-full py-10 relative">
+        <footer className="w-full py-8 border-t mt-10 border-gray-200  dark:border-gray-900 relative">
             <AnimationContainer delay={0.3}>
-                <div className="relative flex flex-col md:flex-row justify-between pb-40 overflow-hidden footer">
+                <div className="container mx-auto relative flex flex-col md:flex-row justify-between pb-20 overflow-hidden">
                     <Particles
                         className="absolute inset-0 w-full -z-10"
                         quantity={40}
@@ -18,42 +19,46 @@ const Footer = () => {
                         color="#d4d4d8"
                         refresh
                     />
-                    <div className="flex flex-col items-start max-w-48">
+                    <div className="flex flex-col items-start max-w-[240px]">
                         <div className="flex items-center gap-2">
-                        <Link href="/" aria-label="SuperCrawler Home" className="flex items-center gap-2">
-                            <Image
-                               
-                                src="/icons/super-crawler-logo.png"
-                                alt="Super Crawler Logo"
-                                width={32}
-                                height={32}
-                                priority 
-                                className="h-8 w-auto"
-                            />
-                        </Link>
-                            <span className="text-xl font-medium">
-                              SuperClawler
-                            </span>
+                            <Link href="/" aria-label="SuperCrawler Home" className="flex items-center gap-2">
+                                <Image
+                                    src="/icons/super-crawler-logo.png"
+                                    alt="Super Crawler Logo"
+                                    width={32}
+                                    height={32}
+                                    priority 
+                                    className="h-8 w-auto"
+                                />
+                                <span className="text-xl  font-serif font-semibold ">
+                                    <AuroraText>
+                                        SuperCrawler
+                                    </AuroraText>
+                                </span>
+                            </Link>
                         </div>
-                        <p className="text-base max-w mt-4">
+                        <p className="text-sm text-muted-foreground mt-4">
                             Empower your business with our AI crawl support.
                         </p>
-                        <Button className="mt-8">
+                        <Button className="mt-6">
                             <Link href="/app">
                                 Start for free
                             </Link>
                         </Button>
                     </div>
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 w-full max-w-lg mt-10 md:mt-0">
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-12 md:gap-8 w-full max-w-2xl mt-12 md:mt-0">
                         {FOOTER_LINKS?.map((section, index) => (
-                            <div key={index} className="flex flex-col gap-4">
-                                <h4 className="text-sm font-medium">
+                            <div key={index} className="flex flex-col gap-3">
+                                <h4 className="text-sm font-semibold">
                                     {section.title}
                                 </h4>
-                                <ul className="space-y-4 w-full">
+                                <ul className="space-y-2 w-full">
                                     {section.links.map((link, index) => (
-                                        <li key={index} className="text-sm text-muted-foreground hover:text-foreground transition-all w-full">
-                                            <Link href={link.href} className="w-full">
+                                        <li key={index}>
+                                            <Link 
+                                                href={link.href} 
+                                                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                                            >
                                                 {link.name}
                                             </Link>
                                         </li>
@@ -65,9 +70,11 @@ const Footer = () => {
                 </div>
             </AnimationContainer>
             <AnimationContainer delay={0.3}>
-                <div className="pt-10 flex items-center justify-between relative">
-                    <p className="text-sm text-secondary-foreground">
-                        &copy; {new Date().getFullYear()} Luro. All rights reserved.
+            <div className=" w-full border-t border-gray-200  dark:border-gray-900 relative">
+  
+             <div className=" py-8">
+                    <p className="text-sm text-muted-foreground mt-10  justify-center items-center flex">
+                        &copy; {new Date().getFullYear()} SuperCrawler All rights reserved.
                     </p>
                     <div className="flex items-center gap-4">
                         <Link href="#" className="p-1">
@@ -81,10 +88,10 @@ const Footer = () => {
                         </Link>
                     </div>
                     </div>
-            
+                </div>
             </AnimationContainer>
         </footer>
     )
 };
 
-export default Footer
+export default Footer;

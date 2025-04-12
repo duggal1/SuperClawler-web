@@ -31,7 +31,7 @@ const GitHubIcon = ({ className }: { className?: string }) => (
 
 // --- Menu Items ---
 const menuItems = [
-    { name: 'Features', href: '#features' },
+    { name: 'Playground', href: '/playground' },
     { name: 'Solution', href: '#solution' },
     { name: 'Pricing', href: '#pricing' },
     { name: 'About', href: '#about' },
