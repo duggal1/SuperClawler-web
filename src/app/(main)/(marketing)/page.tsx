@@ -881,7 +881,7 @@ const darkMdxComponents: MDXComponentsType = {
 // --- Main Component ---
 export default function Home() {
   const [targetUrls, setTargetUrls] = useState('https://vercel.com/docs\nhttps://nextjs.org/docs');
-  const [apiUrl, setApiUrl] = useState('http://127.0.0.1:8080/crawl');
+  const [apiUrl, setApiUrl] = useState('https://supercrawler.onrender.com/crawl');
   const [maxDepth, setMaxDepth] = useState<number>(0);
   const [selectedLangIndex, setSelectedLangIndex] = useState(0);
   const [isCrawling, setIsCrawling] = useState(false);
@@ -1048,84 +1048,75 @@ export default function Home() {
     setRenderedMdx([]);
 
     let effectiveApiUrl = apiUrl.trim();
+
     // Format URLs and remove empty lines
     const urlsToCrawl = targetUrls
-        .split('\n')
-        .map(url => url.trim())
-        .filter(url => url.length > 0)
-        .map(url => {
-            // Ensure URLs have http/https protocol
-            if (!url.startsWith('http://') && !url.startsWith('https://')) {
-                return `https://${url}`;
-            }
-            return url;
-        });
+      .split('\n')
+      .map(url => url.trim())
+      .filter(url => url.length > 0)
+      .map(url => {
+        // Ensure URLs have http/https protocol
+        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+          return `https://${url}`;
+        }
+        return url;
+      });
 
     // Validation checks
-    if (!effectiveApiUrl) {
-        setError('API Endpoint URL cannot be empty.');
-        setIsCrawling(false);
-        return;
-    }
     if (urlsToCrawl.length === 0) {
-        setError('Please enter at least one Target URL to crawl.');
-        setIsCrawling(false);
-        return;
-    }
-
-    // Ensure API URL has protocol
-    if (!effectiveApiUrl.startsWith('http://') && !effectiveApiUrl.startsWith('https://')) {
-        effectiveApiUrl = `http://${effectiveApiUrl}`;
+      setError('Please enter at least one Target URL to crawl.');
+      setIsCrawling(false);
+      return;
     }
 
     // Match the server's CrawlRequest struct exactly
     const payload = {
-        domains: urlsToCrawl,        // Vec<String> in Rust
-        max_depth: maxDepth || 0     // Option<usize> in Rust
+      domains: urlsToCrawl,
+      max_depth: maxDepth || 0
     };
 
     try {
-        console.log('Sending request to:', effectiveApiUrl);
-        console.log('With payload:', JSON.stringify(payload, null, 2));
+      console.log('Sending request to:', effectiveApiUrl);
+      console.log('With payload:', JSON.stringify(payload, null, 2));
 
-        const response = await fetch(effectiveApiUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify(payload)
-        });
+      const response = await fetch(effectiveApiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        },
+        body: JSON.stringify(payload)
+      });
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            let errorMessage;
-            try {
-                const errorJson = JSON.parse(errorText);
-                errorMessage = errorJson.message || errorJson.error || errorText;
-            } catch {
-                errorMessage = errorText;
-            }
-            throw new Error(`API request failed: ${response.status} ${response.statusText}. ${errorMessage}`);
+      if (!response.ok) {
+        let errorMessage = 'Failed to fetch data from the server';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorData.error || errorMessage;
+        } catch {
+          errorMessage = `HTTP error! status: ${response.status}`;
         }
+        throw new Error(errorMessage);
+      }
 
-        const data = await response.json();
+      const data = await response.json();
 
-        // Validate response matches CrawlResponse struct
-        if (!data || !Array.isArray(data.mdx_files) || !Array.isArray(data.logs) || typeof data.message !== 'string') {
-            console.error('Invalid response structure:', data);
-            throw new Error('Invalid response format from server');
-        }
+      // Validate response matches CrawlResponse struct
+      if (!data || !Array.isArray(data.mdx_files) || !Array.isArray(data.logs) || typeof data.message !== 'string') {
+        console.error('Invalid response structure:', data);
+        throw new Error('Invalid response format from server');
+      }
 
-        setCrawlData(data);
+      setCrawlData(data);
 
     } catch (err) {
-        console.error('Crawl request failed:', err);
-        setError(err instanceof Error ? err.message : 'An unknown error occurred');
+      console.error('Crawl request failed:', err);
+      setError(err instanceof Error ? err.message : 'An unknown error occurred');
     } finally {
-        setIsCrawling(false);
+      setIsCrawling(false);
     }
-}, [apiUrl, targetUrls, maxDepth]);
+  }, [apiUrl, targetUrls, maxDepth]);
 
   const syntaxHighlighterStyle = isDarkMode ? vs2015 : github;
 
