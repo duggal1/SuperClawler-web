@@ -8,7 +8,7 @@ export function HeroHeader() {
     <AnimationContainer delay={0.0}>
     <div
       className={cn(
-        "group relative inline-flex mt-16  items-center justify-center rounded-full",
+        "group relative inline-flex mt-8  items-center justify-center rounded-full",
         "border border-neutral-300 dark:border-neutral-700", // Static border, conditional color
         "px-4 py-1.5", // Padding inside the border
         "text-sm font-medium", // Base text style (AnimatedGradientText will override color)
