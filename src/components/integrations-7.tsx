@@ -4,9 +4,11 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { InfiniteSlider } from '@/components/motion-primitives/infinite-slider';
 import Image from 'next/image';
+import AnimationContainer from './Contaniers/global-motion';
 
 export default function IntegrationsSection() {
     return (
+        <AnimationContainer delay={0.3}>
         <section>
             {/* --- Changed Background for Light/Dark Mode --- */}
             <div className="bg-white dark:bg-black py-24 md:py-32">
@@ -100,6 +102,7 @@ export default function IntegrationsSection() {
                 </div>
            
         </section>
+        </AnimationContainer>
     )
 }
 

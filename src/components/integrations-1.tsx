@@ -8,22 +8,24 @@ import Link from 'next/link';
 import * as React from 'react';
 import { Notion, Supabase, OpenAI, Shopify, Zapier, Stripe } from '@/components/motion-primitives/logos';
 import { GlowingEffect } from '@/components/ui/glowing-effect';
+import AnimationContainer from './Contaniers/global-motion';
 export default function SuperCrawlerSection() {
    
     return (
-        <section className="font-serif bg-white dark:bg-black text-neutral-900 dark:text-neutral-100">
+        <AnimationContainer delay={0.3}>
+        <section className="bg-white dark:bg-black font-serif text-neutral-900 dark:text-neutral-100">
                   <div className="py-24 md:py-32">
-                      <div className="mx-auto max-w-6xl px-6">
+                      <div className="mx-auto px-6 max-w-6xl">
                       <div className="text-center">
-  <h2 className="text-balance text-4xl  md:text-5xl lg:text-6xl !leading-tight font-black font-serif">
+  <h2 className="font-serif font-black text-4xl md:text-5xl lg:text-6xl text-balance !leading-tight">
     Crawl your dream{' '}
-    <span className="relative inline-block">
-      <span className="bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 absolute inset-x-0 bottom-0 h-1 rounded-full underline decoration-wavy"></span>
+    <span className="inline-block relative">
+      <span className="bottom-0 absolute inset-x-0 bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 rounded-full h-1 decoration-wavy underline"></span>
       <span className="relative">domains</span>
     </span>{' '}
     in seconds.
   </h2>
-  <p className="text-neutral-600 dark:text-neutral-400 mt-6 text-lg md:text-xl max-w-3xl mx-auto font-serif">
+  <p className="mx-auto mt-6 max-w-3xl font-serif text-neutral-600 dark:text-neutral-400 text-lg md:text-xl">
   Super Crawler is built for extreme scalability and enterprise demands.
   Experience the fastest, most reliable web crawling solution.
   </p>
@@ -32,7 +34,7 @@ export default function SuperCrawlerSection() {
 
         
                      {/* --- Grid using FeatureCard with ORIGINAL LOGOS --- */}
-                     <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+                     <div className="gap-8 grid sm:grid-cols-2 lg:grid-cols-3 mt-16">
                          <FeatureCard
                              title="Blazing Fast Crawling"
                              description="Utilizes optimized, parallel processing for sub-second domain crawls. Speed is not a feature, it's the standard."
@@ -84,10 +86,10 @@ export default function SuperCrawlerSection() {
         
                      {/* Optional: Add a general call to action */}
                      <div className="mt-20 text-center">
-                         {/* <Button size="lg" asChild className="font-serif group px-8 py-3 text-base">
+                         {/* <Button size="lg" asChild className="group px-8 py-3 font-serif text-base">
                              <Link href="/#get-started">
                                  Start Crawling Now
-                                 <ChevronRight className="ml-2 h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+                                 <ChevronRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1 duration-300" />
                              </Link>
                          </Button> */}
                      </div>
@@ -95,8 +97,9 @@ export default function SuperCrawlerSection() {
                  </div>
              </div>
               </section>
+              </AnimationContainer>
           )
-        // }
+       
   
 }
 
@@ -113,7 +116,7 @@ const FeatureCard: React.FC<{ title: string; description: string; children: Reac
         // Apply GlowingEffect wrapper here
         // Pass className with rounding and height to GlowingEffect itself
         <GlowingEffect
-            className="h-full rounded-xl" // Apply rounding and height here
+            className="rounded-xl h-full" // Apply rounding and height here
             spread={40}
             glow={true}
             disabled={false}
@@ -126,23 +129,23 @@ const FeatureCard: React.FC<{ title: string; description: string; children: Reac
             {/* Card component is now a direct child of GlowingEffect */}
             {/* Remove relative and h-full from Card, it's handled by GlowingEffect's wrapper */}
             {/* Keep overflow-hidden on Card if its content might exceed bounds */}
-            <Card className="h-full overflow-hidden border border-neutral-200/80 dark:border-neutral-800/80 bg-neutral-50/50 dark:bg-neutral-950/30 p-6 shadow-sm transition-all duration-300 hover:border-neutral-300 dark:hover:border-neutral-700 dark:shadow-neutral-900/50 flex flex-col">
+            <Card className="flex flex-col bg-neutral-50/50 dark:bg-neutral-950/30 shadow-sm dark:shadow-neutral-900/50 p-6 border border-neutral-200/80 hover:border-neutral-300 dark:border-neutral-800/80 dark:hover:border-neutral-700 h-full overflow-hidden transition-all duration-300">
                  {/* Logo */}
                 <div className="mb-4 text-neutral-600 dark:text-neutral-300">
                     {logo}
                 </div>
 
                 {/* Text Content */}
-                <div className="space-y-2 mb-4 flex-grow">
-                    <h3 className="text-lg font-medium text-neutral-900 dark:text-neutral-100">{title}</h3>
+                <div className="flex-grow space-y-2 mb-4">
+                    <h3 className="font-medium text-neutral-900 dark:text-neutral-100 text-lg">{title}</h3>
                     <p className="text-neutral-600 dark:text-neutral-400 text-sm leading-relaxed">{description}</p>
                 </div>
 
                 {/* Link */}
                 <div className="mt-auto pt-4">
-                    <Link href={link} className="group inline-flex items-center text-sm font-medium text-sky-600 dark:text-sky-400 hover:text-sky-800 dark:hover:text-sky-300 transition-colors">
+                    <Link href={link} className="group inline-flex items-center font-medium text-sky-600 hover:text-sky-800 dark:hover:text-sky-300 dark:text-sky-400 text-sm transition-colors">
                         Learn More
-                        <ChevronRight className="ml-1 !size-4 opacity-70 transition-transform duration-300 group-hover:translate-x-1" />
+                        <ChevronRight className="opacity-70 ml-1 !size-4 transition-transform group-hover:translate-x-1 duration-300" />
                     </Link>
                 </div>
             </Card>

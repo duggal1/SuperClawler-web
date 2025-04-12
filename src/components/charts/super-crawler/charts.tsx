@@ -20,6 +20,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart"
 import { Badge } from "@/components/ui/badge"
+import AnimationContainer from '@/components/Contaniers/global-motion'
 
 // --- Updated Data for Super Crawler ---
 const chartData = [
@@ -86,12 +87,14 @@ export default function ChartSuperCrawler() {
   }))
 
   return (
+    <AnimationContainer delay={0.2}>
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
       className="mx-auto max-w-5xl"
     >
+         
       {/* Card Styling: Removed font-serif, simplified background/shadow, added border */}
       <Card className="border border-border/30 rounded-xl shadow-lg bg-card overflow-hidden relative">
         {/* Subtle Background Glow */}
@@ -344,6 +347,8 @@ export default function ChartSuperCrawler() {
           </motion.div>
         </CardFooter>
       </Card>
+
     </motion.div>
+    </AnimationContainer>
   )
 }

@@ -27,6 +27,7 @@ import { SplineScene } from '@/components/ui/splite';
 import IntegrationsSection from '@/components/integrations-7';
 import SuperCrawlers from '@/components/integrations-1';
 import  ChartSuperCrawler  from '@/components/charts/super-crawler/charts';
+import AnimationContainer from '@/components/Contaniers/global-motion';
 
 // --- Interfaces ---
 interface CrawlResponse {
@@ -1135,7 +1136,8 @@ export default function Home() {
           animation="stagger"
           className="mb-20 sm:mb-32 text-center relative" // Parent needs to be relative
         >
-             {/* Spline Container - Make it absolute and behind */}
+          <AnimationContainer delay={0.2}>
+            
              <div className="absolute inset-0 z-0">
            <SplineScene 
              // Conditionally set the scene based on the theme
@@ -1157,8 +1159,8 @@ export default function Home() {
               Web-to-MDX Conversion Tool
             </span>
           </MotionContainer>
-
-          {/* Text Content Container 2 - Make it relative and on top */}
+          </AnimationContainer>
+   
           <MotionContainer
             animation="fadeInUp"
             className={`relative z-10 text-4xl sm:text-5xl md:text-6xl font-bold block mb-6 font-serif tracking-tight max-w-4xl mx-auto leading-tight ${isDarkMode ? 'text-white' : 'text-gray-950'}`}
@@ -1166,9 +1168,11 @@ export default function Home() {
      From URL to  <span className="bg-gradient-to-r dark:from-pink-500 dark:to-cyan-400  from-indigo-600 to-purple-600 bg-clip-text text-transparent">NO BS</span>
      <br/> LLM-Ready Markdown in Seconds.
             <span className="block bg-clip-text bg-gradient-to-r from-indigo-600 dark:from-indigo-400 via-purple-600 to-blue-500 dark:to-purple-400 text-transparent"> </span>
+           
+
           </MotionContainer>
 
-          {/* Text Content Container 3 - Make it relative and on top */}
+      
           <MotionContainer
             animation="fadeInUp"
             className={`relative z-10 text-xl md:text-2xl max-w-3xl mx-auto mb-10 leading-relaxed font-serif ${isDarkMode ? 'text-gray-50' : 'text-gray-700'}`}
@@ -1197,7 +1201,7 @@ export default function Home() {
             ))}
           </MotionContainer>
 
-          {/* Divider - Make it relative and on top */}
+         
           <MotionContainer
             animation="fadeIn"
             delay={0.4}
@@ -1206,7 +1210,7 @@ export default function Home() {
             <div className="bg-gradient-to-r from-indigo-500 to-purple-500 opacity-70 mx-auto mb-8 rounded-full w-36 h-1.5" />
           </MotionContainer>
         </MotionContainer>
-
+        <AnimationContainer delay={0.3}>
         <MotionContainer
           animation="fadeInUp"
           delay={0.2}
@@ -1312,7 +1316,8 @@ export default function Home() {
             </div>
           </div>
         </MotionContainer>
-
+        </AnimationContainer>
+        <AnimationContainer delay={0.2}>
         <AnimatePresence>
           {isCrawling && !error && !crawlData && (
             <MotionContainer
@@ -1525,6 +1530,9 @@ export default function Home() {
             </MotionContainer>
           )}
         </AnimatePresence>
+        </AnimationContainer>
+
+        <AnimationContainer delay={0.2}>
 
         <MotionContainer
           animation="fadeInUp"
@@ -1611,6 +1619,7 @@ export default function Home() {
             </div>
           </div>
         </MotionContainer>
+        </AnimationContainer>
       </main>
       <SuperCrawlers/>
 <div className="-mt-16">
