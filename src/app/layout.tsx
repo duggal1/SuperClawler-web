@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import { ThemeProvider } from "@/app/providers/theme-provider";
 import "./globals.css";
+import {Navbar} from "@/components/navbar/navbar";
 
 export const metadata: Metadata = {
   title: "MDX Converter | Transform Web Content to MDX",
@@ -17,6 +18,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className="antialiased font-serif min-h-screen">
         <ThemeProvider>
+        <Navbar/>
         <div className="min-h-screen bg-background  text-gray-900 dark:text-white">{children}</div>
         </ThemeProvider>
       </body>

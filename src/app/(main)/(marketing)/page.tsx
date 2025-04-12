@@ -1,3 +1,4 @@
+/* eslint-disable prefer-const */
 /* eslint-disable @next/next/no-img-element */
 /* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable @typescript-eslint/no-unused-vars */
@@ -942,6 +943,38 @@ export default function Home() {
     setMaxDepth(isNaN(depth) || depth < 0 ? 0 : depth);
   }, []);
 
+  const sanitizeMdxContent = (content: string): string => {
+    return content
+      // Remove frontmatter markers if they exist
+      .replace(/^---\n[\s\S]*?\n---\n/, '')
+      // Convert HTML comments to MDX comments
+      .replace(/<!--[\s\S]*?-->/g, '{/* $& */}')
+      // Fix image syntax
+      .replace(/!\[(.*?)\]\((.*?)\)/g, '<img alt="$1" src="$2" />')
+      // Handle HTML tags properly
+      .replace(/<\/?(?!img|br|hr|a|p|div|span|h1|h2|h3|h4|h5|h6)[^>]*>/g, '')
+      // Clean up multiple newlines
+      .replace(/\n{3,}/g, '\n\n');
+  };
+
+  const processFrontmatter = (content: string) => {
+    try {
+      const { data, content: mdxContent } = matter(content);
+      // Clean up frontmatter data
+      const cleanedData = Object.entries(data).reduce((acc, [key, value]) => {
+        if (value !== null && value !== undefined && value !== '') {
+          acc[key] = value;
+        }
+        return acc;
+      }, {} as Record<string, unknown>);
+      
+      return { frontmatter: cleanedData, content: mdxContent };
+    } catch (error) {
+      console.warn('Error processing frontmatter:', error);
+      return { frontmatter: {}, content };
+    }
+  };
+
   useEffect(() => {
     const processMdx = async () => {
         if (!crawlData?.mdx_files?.length) {
@@ -952,22 +985,47 @@ export default function Home() {
 
         try {
             const processed = await Promise.all(
-                crawlData.mdx_files.map(async ([url, mdxContent]): Promise<RenderedMdxItem | null> => {
+                crawlData.mdx_files.map(async ([url, mdxContent], index): Promise<RenderedMdxItem | null> => {
                     if (typeof mdxContent !== 'string' || mdxContent.trim() === '') {
                         console.warn(`Skipping empty or invalid MDX content for ${url}`);
                         return null;
                     }
+
                     try {
-                        const { content, data: frontmatter } = matter(mdxContent);
-                        const mdxSource = await serialize(content, { parseFrontmatter: false });
-                        return { url, mdxSource, frontmatter: frontmatter || {} };
+                        // Process frontmatter and clean content
+                        const { frontmatter, content } = processFrontmatter(mdxContent);
+                        
+                        // Sanitize the MDX content
+                        const sanitizedContent = sanitizeMdxContent(content);
+
+                        // Serialize with enhanced options
+                        const mdxSource = await serialize(sanitizedContent, {
+                          parseFrontmatter: false,
+                          mdxOptions: {
+                            remarkPlugins: [],
+                            rehypePlugins: [],
+                            format: 'mdx',
+                            development: false,
+                          },
+                        });
+
+                        return { 
+                          url, 
+                          mdxSource, 
+                          frontmatter 
+                        };
                     } catch (serializeError) {
                         console.error(`Error processing MDX for ${url}:`, serializeError);
-                        setError((prev) => (prev ? `${prev}\n` : '') + `Failed to process MDX for ${url}. Check console for details.`);
+                        setError((prev) => 
+                          (prev ? `${prev}\n` : '') + 
+                          `Failed to process MDX for ${url}. ${(serializeError as Error).message || 'Unknown error'}`
+                        );
                         return null;
                     }
                 })
             );
+
+            // Filter out null results and set state
             setRenderedMdx(processed.filter((item): item is RenderedMdxItem => item !== null));
         } catch (err) {
             console.error("Error during MDX processing batch:", err);
@@ -989,11 +1047,20 @@ export default function Home() {
     setRenderedMdx([]);
 
     let effectiveApiUrl = apiUrl.trim();
+    // Format URLs and remove empty lines
     const urlsToCrawl = targetUrls
         .split('\n')
         .map(url => url.trim())
-        .filter(url => url.length > 0);
+        .filter(url => url.length > 0)
+        .map(url => {
+            // Ensure URLs have http/https protocol
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                return `https://${url}`;
+            }
+            return url;
+        });
 
+    // Validation checks
     if (!effectiveApiUrl) {
         setError('API Endpoint URL cannot be empty.');
         setIsCrawling(false);
@@ -1004,78 +1071,60 @@ export default function Home() {
         setIsCrawling(false);
         return;
     }
-    if (maxDepth < 0) {
-        setError('Max Depth cannot be negative.');
-        setIsCrawling(false);
-        return;
+
+    // Ensure API URL has protocol
+    if (!effectiveApiUrl.startsWith('http://') && !effectiveApiUrl.startsWith('https://')) {
+        effectiveApiUrl = `http://${effectiveApiUrl}`;
     }
 
-    effectiveApiUrl = (!effectiveApiUrl.startsWith('http://') && !effectiveApiUrl.startsWith('https://'))
-        ? `http://${effectiveApiUrl}`
-        : effectiveApiUrl;
-
-    const formattedUrls = urlsToCrawl.map(url =>
-        (!url.startsWith('http://') && !url.startsWith('https://')) ? `https://${url}` : url
-    );
-
-    console.log(`Starting crawl via API: ${effectiveApiUrl}`);
-    console.log(`Domains: ${formattedUrls.join(', ')}`);
-    console.log(`Max Depth: ${maxDepth}`);
+    // Match the server's CrawlRequest struct exactly
+    const payload = {
+        domains: urlsToCrawl,        // Vec<String> in Rust
+        max_depth: maxDepth || 0     // Option<usize> in Rust
+    };
 
     try {
-      const response = await fetch(effectiveApiUrl, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-        },
-        body: JSON.stringify({
-          domains: formattedUrls,
-          max_depth: maxDepth
-        }),
-      });
+        console.log('Sending request to:', effectiveApiUrl);
+        console.log('With payload:', JSON.stringify(payload, null, 2));
 
-      const responseBodyText = await response.text();
+        const response = await fetch(effectiveApiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
 
-      if (!response.ok) {
-        let errorDetail = responseBodyText;
-        try {
-          const errorJson = JSON.parse(responseBodyText);
-          errorDetail = errorJson.detail || errorJson.message || responseBodyText;
-        } catch { /* Ignore parsing error, use raw text */ }
-        throw new Error(`API Request Failed: ${response.status} ${response.statusText}. ${errorDetail}`);
-      }
+        if (!response.ok) {
+            const errorText = await response.text();
+            let errorMessage;
+            try {
+                const errorJson = JSON.parse(errorText);
+                errorMessage = errorJson.message || errorJson.error || errorText;
+            } catch {
+                errorMessage = errorText;
+            }
+            throw new Error(`API request failed: ${response.status} ${response.statusText}. ${errorMessage}`);
+        }
 
-      let data: unknown;
-      try {
-          data = JSON.parse(responseBodyText);
-      } catch (parseError) {
-          console.error("Failed to parse API response JSON:", parseError);
-          console.log("Raw response body:", responseBodyText);
-          throw new Error("Received invalid JSON response from the API.");
-      }
+        const data = await response.json();
 
-      const isValidResponse = (res: any): res is CrawlResponse =>
-          typeof res?.message === 'string' &&
-          Array.isArray(res?.logs) &&
-          Array.isArray(res?.mdx_files) &&
-          res.mdx_files.every((file: any) => Array.isArray(file) && file.length === 2 && typeof file[0] === 'string' && typeof file[1] === 'string');
+        // Validate response matches CrawlResponse struct
+        if (!data || !Array.isArray(data.mdx_files) || !Array.isArray(data.logs) || typeof data.message !== 'string') {
+            console.error('Invalid response structure:', data);
+            throw new Error('Invalid response format from server');
+        }
 
-      if (!isValidResponse(data)) {
-          console.error("Invalid API response structure:", data);
-          throw new Error("Received data structure from API does not match expected format.");
-      }
-
-      setCrawlData(data);
+        setCrawlData(data);
 
     } catch (err) {
-      console.error("API Call or Processing Error:", err);
-      const message = err instanceof Error ? err.message : 'An unknown error occurred. Check browser console for details.';
-      setError(message);
+        console.error('Crawl request failed:', err);
+        setError(err instanceof Error ? err.message : 'An unknown error occurred');
     } finally {
-      setIsCrawling(false);
+        setIsCrawling(false);
     }
-  }, [apiUrl, targetUrls, maxDepth]);
+}, [apiUrl, targetUrls, maxDepth]);
 
   const syntaxHighlighterStyle = isDarkMode ? vs2015 : github;
 
@@ -1317,7 +1366,7 @@ export default function Home() {
           </div>
         </MotionContainer>
         </AnimationContainer>
-        <AnimationContainer delay={0.2}>
+
         <AnimatePresence>
           {isCrawling && !error && !crawlData && (
             <MotionContainer
@@ -1437,7 +1486,7 @@ export default function Home() {
                   <div className="space-y-12">
                     {renderedMdx.map((item, index) => (
                         <MotionContainer
-                          key={`${item.url}-${index}`}
+                          key={`mdx-item-${item.url}-${index}`} // Ensure unique keys
                           animation="fadeInUp"
                           delay={0.4 + index * 0.15}
                           className={`rounded-2xl shadow-lg border overflow-hidden transition-all duration-300 ${
@@ -1493,11 +1542,25 @@ export default function Home() {
                         
                         {/* MDX Content Body (Keep as is) */}
                         <div className={`px-6 sm:px-8 md:px-10 py-10 ${isDarkMode ? 'bg-black' : 'bg-white'}`}>
-                           <div className="max-w-none mdx-content"> 
+                           <div className="max-w-none mdx-content prose dark:prose-invert"> 
                               <MDXRemote
                                 {...item.mdxSource}
-                              components={componentsToUse}
-                                scope={item.frontmatter}
+                              components={{
+                                ...componentsToUse,
+                                // Add specific overrides for problematic elements
+                                img: (props) => (
+                                  <img
+                                    {...props}
+                                    loading="lazy"
+                                    className="rounded-lg shadow-md my-4"
+                                    onError={(e) => {
+                                      const img = e.currentTarget;
+                                      img.onerror = null;
+                                      img.src = "https://placehold.co/600x400?text=Image+Not+Found";
+                                    }}
+                                  />
+                                ),
+                              }}
                               />
                           </div>
                         </div>
@@ -1530,10 +1593,7 @@ export default function Home() {
             </MotionContainer>
           )}
         </AnimatePresence>
-        </AnimationContainer>
-
-        <AnimationContainer delay={0.2}>
-
+        
         <MotionContainer
           animation="fadeInUp"
           delay={0.3}
@@ -1619,7 +1679,7 @@ export default function Home() {
             </div>
           </div>
         </MotionContainer>
-        </AnimationContainer>
+    
       </main>
       <SuperCrawlers/>
 <div className="-mt-16">
