@@ -880,8 +880,7 @@ const darkMdxComponents: MDXComponentsType = {
 
 // --- Main Component ---
 export default function Home() {
-  const [targetUrls, setTargetUrls] = useState('https://vercel.com/docs\nhttps://nextjs.org/docs');
-  const [apiUrl, setApiUrl] = useState('https://supercrawler.onrender.com/crawl');
+  const [targetUrls, setTargetUrls] = useState('https://science.nasa.gov/universe/stars/\nhttps://nextjs.org/docs');
   const [maxDepth, setMaxDepth] = useState<number>(0);
   const [selectedLangIndex, setSelectedLangIndex] = useState(0);
   const [isCrawling, setIsCrawling] = useState(false);
@@ -890,6 +889,7 @@ export default function Home() {
   const [copiedCode, setCopiedCode] = useState(false);
   const [showCopySnackbar, setShowCopySnackbar] = useState(false);
   const [renderedMdx, setRenderedMdx] = useState<RenderedMdxItem[]>([]);
+  const [logs, setLogs] = useState<string[]>([]);  // Add this new state
 
   const { setTheme, resolvedTheme } = useTheme();
   const isDarkMode = resolvedTheme === 'dark';
@@ -933,10 +933,6 @@ export default function Home() {
 
   const handleTargetUrlsChange = useCallback((event: ChangeEvent<HTMLTextAreaElement>) => {
     setTargetUrls(event.target.value);
-  }, []);
-
-  const handleApiUrlChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
-    setApiUrl(event.target.value);
   }, []);
 
   const handleMaxDepthChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
@@ -1046,77 +1042,86 @@ export default function Home() {
     setError(null);
     setCrawlData(null);
     setRenderedMdx([]);
+    setLogs([]); // Reset logs
 
-    let effectiveApiUrl = apiUrl.trim();
-
-    // Format URLs and remove empty lines
     const urlsToCrawl = targetUrls
       .split('\n')
       .map(url => url.trim())
       .filter(url => url.length > 0)
-      .map(url => {
-        // Ensure URLs have http/https protocol
-        if (!url.startsWith('http://') && !url.startsWith('https://')) {
-          return `https://${url}`;
-        }
-        return url;
-      });
+      .map(url => !url.startsWith('http') ? `https://${url}` : url);
 
-    // Validation checks
     if (urlsToCrawl.length === 0) {
       setError('Please enter at least one Target URL to crawl.');
       setIsCrawling(false);
       return;
     }
 
-    // Match the server's CrawlRequest struct exactly
     const payload = {
       domains: urlsToCrawl,
       max_depth: maxDepth || 0
     };
 
     try {
-      console.log('Sending request to:', effectiveApiUrl);
-      console.log('With payload:', JSON.stringify(payload, null, 2));
-
-      const response = await fetch(effectiveApiUrl, {
+      const response = await fetch('https://supercrawler.onrender.com/crawl', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Access-Control-Allow-Origin': '*'
         },
         body: JSON.stringify(payload)
       });
 
       if (!response.ok) {
-        let errorMessage = 'Failed to fetch data from the server';
-        try {
-          const errorData = await response.json();
-          errorMessage = errorData.message || errorData.error || errorMessage;
-        } catch {
-          errorMessage = `HTTP error! status: ${response.status}`;
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      if (!response.body) {
+        throw new Error('Response body is null');
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          if (line.trim() === '') continue;
+          if (line === ': keep-alive') continue;
+
+          try {
+            if (line.startsWith('data: ')) {
+              const data = line.slice(6);
+              if (data.startsWith('{')) {
+                // This is the completion event
+                const completionData = JSON.parse(data);
+                setCrawlData(completionData);
+                setIsCrawling(false);
+              } else {
+                // This is a log message
+                setLogs(prev => [...prev, data]);
+              }
+            } else if (line.startsWith('event: completion')) {
+              // Next line will be the completion data
+              continue;
+            }
+          } catch (e) {
+            console.warn('Error processing line:', e);
+          }
         }
-        throw new Error(errorMessage);
       }
-
-      const data = await response.json();
-
-      // Validate response matches CrawlResponse struct
-      if (!data || !Array.isArray(data.mdx_files) || !Array.isArray(data.logs) || typeof data.message !== 'string') {
-        console.error('Invalid response structure:', data);
-        throw new Error('Invalid response format from server');
-      }
-
-      setCrawlData(data);
-
     } catch (err) {
       console.error('Crawl request failed:', err);
       setError(err instanceof Error ? err.message : 'An unknown error occurred');
-    } finally {
       setIsCrawling(false);
     }
-  }, [apiUrl, targetUrls, maxDepth]);
+  }, [targetUrls, maxDepth]);
 
   const syntaxHighlighterStyle = isDarkMode ? vs2015 : github;
 
@@ -1216,30 +1221,11 @@ export default function Home() {
                 Convert Your Web Content
               </h2>
               <p className={`font-serif text-lg ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                Enter API endpoint, target URLs (one per line), and crawl depth.
+                Enter target URLs (one per line), and crawl depth.
               </p>
             </div>
 
             <div className="space-y-6 p-8">
-              <div className="space-y-2">
-                <label htmlFor="apiUrlInput" className={`text-sm font-medium mb-1.5 flex items-center gap-1.5 ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
-                  <Server className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
-                  API Endpoint
-                </label>
-                <div className="relative">
-                  <input
-                    type="url"
-                    id="apiUrlInput"
-                    value={apiUrl}
-                    onChange={handleApiUrlChange}
-                    placeholder="e.g., http://localhost:8080/crawl"
-                    className={`w-full px-4 py-3.5 rounded-xl border focus:ring-2 focus:border-indigo-500 dark:focus:border-indigo-400 outline-none transition duration-200 font-serif shadow-sm placeholder:text-gray-400/80 dark:placeholder:text-gray-500/80 ${isDarkMode ? 'border-gray-700 bg-black focus:ring-indigo-400/40 text-white' : 'border-gray-200 bg-white focus:ring-indigo-500/50 text-gray-900'}`}
-                    disabled={isCrawling}
-                  />
-                </div>
-                <p className={`text-sm pl-1 font-serif ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>The URL of your running Web-to-MDX crawler service.</p>
-              </div>
-
               <div className="space-y-2">
                 <label htmlFor="targetUrlsInput" className={`text-sm font-medium mb-1.5 flex items-center gap-1.5 ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
                   <List className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
@@ -1273,13 +1259,39 @@ export default function Home() {
                      className={`w-full px-4 py-3.5 rounded-xl border focus:ring-2 focus:border-indigo-500 dark:focus:border-indigo-400 outline-none transition duration-200 font-serif shadow-sm ${isDarkMode ? 'border-gray-700 bg-black focus:ring-indigo-400/40 text-white' : 'border-gray-200 bg-white focus:ring-indigo-500/50 text-gray-900'}`}
                      disabled={isCrawling}
                    />
-                   <p className={`text-xs pl-1 font-serif ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>0 = only entered URLs.</p>
-                </div>
+<div className="space-y-2">
+  <p className={`text-xs pl-1 font-serif ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+  😎Start with depth 0 for instant results,Go up to depth 5 for a deeper crawl 🤯
 
+
+  </p>
+  <div className={`mt-2 p-2 rounded-lg border ${
+    isDarkMode 
+      ? 'bg-amber-950/20 border-amber-800/30 text-amber-200' 
+      : 'bg-amber-50 border-amber-200/30 text-amber-800'
+  }`}>
+    <div className="flex items-center gap-2">
+      <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+      <p className="text-xs font-medium">
+        Warning: Depth 3-5 triggers an extremely aggressive crawl and may take 1–2 minutes.
+      </p>
+    </div>
+  </div>
+</div>
+                </div>
+        
                 <div className="md:col-span-2"></div>
 
                 <div className="md:col-span-1">
-                  <button
+                <h1 className=" block text-gray-900 text-base font-semibold -mt-8 pb-6  items-center gap-2">
+  📜 Live Logs Ahead!
+  <p className="text-transparent bg-gradient-to-r from-emerald-400 to-emerald-600 bg-clip-text ml-2">
+    Scroll down to explore the action!
+  </p>
+  <span className="ml-1">👇🏻</span>
+</h1>
+
+         <button
                     onClick={startCrawl}
                     disabled={isCrawling}
                     className={`
@@ -1327,6 +1339,28 @@ export default function Home() {
               <p className={`max-w-md font-serif ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                 Crawling URLs and converting content. This might take a while...
               </p>
+            </MotionContainer>
+          )}
+
+          {isCrawling && logs.length > 0 && (
+            <MotionContainer
+              animation="fadeIn"
+              className="mb-8"
+            >
+              <div className={`rounded-2xl p-6 shadow-xl border ${isDarkMode ? 'bg-black border-gray-800 shadow-indigo-950/10' : 'bg-white border-gray-100 shadow-indigo-100/20'}`}>
+                <h3 className={`text-xl font-bold mb-4 font-serif flex items-center gap-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                  <Terminal className="w-5 h-5 text-indigo-500" />
+                  Live Logs
+                </h3>
+                <div className={`p-4 rounded-xl font-mono text-sm whitespace-pre-wrap ${isDarkMode ? 'bg-gray-900/50 text-gray-300' : 'bg-gray-50 text-gray-700'}`}>
+                  {logs.map((log, index) => (
+                    <div key={index} className="flex items-start gap-2 mb-1">
+                      <span className="text-indigo-500">$</span>
+                      <span>{log}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </MotionContainer>
           )}
 
@@ -1437,76 +1471,62 @@ export default function Home() {
                               : 'bg-white border-gray-100 shadow-indigo-100/20 hover:border-indigo-200/70 hover:shadow-indigo-100/40'
                           }`}
                         >
-                          {/* Item Header: URL and Metadata */}
-                          <div className={`p-6 border-b ${ isDarkMode ? 'border-gray-800/90 bg-gradient-to-b from-black to-gray-950/70' : 'border-gray-100 bg-gradient-to-b from-white to-gray-50/70'}`}>
-                            {/* Source URL (Keep as is) */}
-                            <div className="mb-5">
-                              <div className="flex items-center gap-2 mb-2">
-                                <div className={`w-6 h-6 rounded-md flex items-center justify-center shadow-sm ${ isDarkMode ? 'bg-indigo-900/50 text-indigo-300' : 'bg-indigo-50 text-indigo-700' }`}>
-                                  <Globe className="w-3.5 h-3.5" />
-                                </div>
-                                <span className={`text-xs font-semibold uppercase tracking-wider ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Source URL</span>
+                          {/* URL Header */}
+                          <div className={`p-6 border-b ${isDarkMode ? 'border-gray-800/90' : 'border-gray-100'}`}>
+                            <div className="flex items-center gap-2 mb-2">
+                              <div className={`w-6 h-6 rounded-md flex items-center justify-center shadow-sm ${
+                                isDarkMode ? 'bg-indigo-900/50 text-indigo-300' : 'bg-indigo-50 text-indigo-700'
+                              }`}>
+                                <Globe className="w-3.5 h-3.5" />
                               </div>
-                              <a
-                                href={item.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center gap-1.5 font-serif font-medium text-indigo-600 hover:text-indigo-700 dark:hover:text-indigo-300 dark:text-indigo-400 text-base hover:underline break-all transition-colors"
-                              >
-                                {item.url}
-                                <ExternalLink className="opacity-70 w-3.5 h-3.5 shrink-0" />
-                              </a>
+                              <span className={`text-xs font-semibold uppercase tracking-wider ${
+                                isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                              }`}>Source URL</span>
                             </div>
+                            <a
+                              href={item.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-1.5 font-serif font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 text-base hover:underline break-all transition-colors"
+                            >
+                              {item.url}
+                              <ExternalLink className="opacity-70 w-3.5 h-3.5 shrink-0" />
+                            </a>
+                          </div>
 
-                          {/* Frontmatter (Metadata) - Conditional Rendering */}
-                            <div>
+                          {/* Metadata Section */}
+                          {Object.keys(item.frontmatter).length > 0 && (
+                            <div className={`px-6 py-4 border-b ${isDarkMode ? 'border-gray-800/90' : 'border-gray-100'}`}>
                               <div className="flex items-center gap-2 mb-2">
-                                <div className={`w-6 h-6 rounded-md flex items-center justify-center shadow-sm ${ isDarkMode ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-700' }`}>
+                                <div className={`w-6 h-6 rounded-md flex items-center justify-center shadow-sm ${
+                                  isDarkMode ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-700'
+                                }`}>
                                   <TableIcon className="w-3.5 h-3.5" />
                                 </div>
-                                <span className={`text-xs font-semibold uppercase tracking-wider ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Metadata</span>
+                                <span className={`text-xs font-semibold uppercase tracking-wider ${
+                                  isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                                }`}>Metadata</span>
                               </div>
-                            {Object.keys(item.frontmatter).length > 0 ? (
-                              // Render the metadata table if frontmatter is not empty
-                                  <div className={`rounded-lg border p-4 max-h-48 overflow-y-auto scrollbar-thin text-xs font-mono ${ isDarkMode ? 'bg-black/50 border-gray-800 scrollbar-thumb-gray-700' : 'bg-white/80 border-gray-100 scrollbar-thumb-gray-200' }`}>
-                                    <pre className="break-all whitespace-pre-wrap">
-                                      {JSON.stringify(item.frontmatter, null, 2)}
-                                    </pre>
-                                  </div>
-                            ) : (
-                              // Render "Not Found" message if frontmatter is empty
-                              <div className={`rounded-lg border border-dashed p-4 text-center ${ isDarkMode ? 'bg-black/30 border-gray-700/80 text-gray-500' : 'bg-white/60 border-gray-200/90 text-gray-400' }`}>
-                                <span className="font-serif text-sm italic">🤷‍♂️ No metadata (title, description, etc.) found on this page.</span>
+                              <div className={`rounded-lg border p-4 font-mono text-sm ${
+                                isDarkMode ? 'bg-black/50 border-gray-800' : 'bg-white/80 border-gray-100'
+                              }`}>
+                                <pre className="whitespace-pre-wrap break-words">
+                                  {JSON.stringify(item.frontmatter, null, 2)}
+                                </pre>
                               </div>
-                            )}
-                          </div>
-                        </div>
-                        
-                        {/* MDX Content Body (Keep as is) */}
-                        <div className={`px-6 sm:px-8 md:px-10 py-10 ${isDarkMode ? 'bg-black' : 'bg-white'}`}>
-                           <div className="max-w-none mdx-content prose dark:prose-invert"> 
+                            </div>
+                          )}
+
+                          {/* MDX Content Section */}
+                          <div className={`p-6 ${isDarkMode ? 'bg-black' : 'bg-white'}`}>
+                            <div className="prose dark:prose-invert max-w-none">
                               <MDXRemote
                                 {...item.mdxSource}
-                              components={{
-                                ...componentsToUse,
-                                // Add specific overrides for problematic elements
-                                img: (props) => (
-                                  <img
-                                    {...props}
-                                    loading="lazy"
-                                    className="rounded-lg shadow-md my-4"
-                                    onError={(e) => {
-                                      const img = e.currentTarget;
-                                      img.onerror = null;
-                                      img.src = "https://placehold.co/600x400?text=Image+Not+Found";
-                                    }}
-                                  />
-                                ),
-                              }}
+                                components={componentsToUse}
                               />
+                            </div>
                           </div>
-                        </div>
-                      </MotionContainer>
+                        </MotionContainer>
                     ))}
                   </div>
                 ) : (
