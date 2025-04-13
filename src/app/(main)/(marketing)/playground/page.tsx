@@ -1,7 +1,9 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // app/page.tsx
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 
 import { Loader2, AlertTriangle, FileText, Clock, List, Eye, EyeOff } from 'lucide-react'; // Added KeyRound, Eye, EyeOff
@@ -32,30 +34,30 @@ interface TimingInfo {
 
 interface CrawlResult {
   message: string;
-  processed_initial_urls: string[]; // Updated name
-  original_urls_from_firecrawl: string[]; // Updated name
+  processed_mdx_url_count: number;
+  initial_urls_from_firecrawl: string[];
   mdx_files: [string, string][];
-  timings: TimingInfo; // Updated structure
-  logs: string[];
+  timings: TimingInfo;
+  params: RequestParams;
 }
 
 interface ApiError {
   error: string;
-  logs: string[];
-  timings?: Partial<Omit<TimingInfo, 'params'>> & { params?: Partial<RequestParams> }; // Allow partial timings on error
+  logs?: string[];
+  timings?: Partial<Omit<TimingInfo, 'params'>> & { params?: Partial<RequestParams> };
 }
 // --- End Updated Types ---
 
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+const API_URL =  'http://localhost:8080'; 
 
 export default function Home() {
   // --- State ---
   const [query, setQuery] = useState<string>('latest advancements in ai');
   const [maxUrls, setMaxUrls] = useState<number>(10);
   const [firecrawlDepth, setFirecrawlDepth] = useState<number>(1);
-  const [crawlDepth, setCrawlDepth] = useState<number>(2);
-  const [timeLimit, setTimeLimit] = useState<number>(180);
+  const [crawlDepth, setCrawlDepth] = useState<number>(1);
+  const [timeLimit, setTimeLimit] = useState<number>(300);
   // --- NEW State for API Key ---
   const [firecrawlApiKey, setFirecrawlApiKey] = useState<string>('');
   const [showApiKey, setShowApiKey] = useState<boolean>(false);
@@ -64,31 +66,41 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<ApiError | null>(null);
   const [result, setResult] = useState<CrawlResult | null>(null);
+  const [logs, setLogs] = useState<string[]>([]);
   const [selectedMdxIndex, setSelectedMdxIndex] = useState<number>(0);
 
   const logsEndRef = useRef<HTMLDivElement>(null);
+  const eventSourceRef = useRef<EventSource | null>(null);
 
   // --- Effects ---
   useEffect(() => {
-    logsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [result?.logs, error?.logs]);
+    // No auto-scrolling behavior
+  }, [logs]);
+
+  useEffect(() => {
+    return () => {
+      eventSourceRef.current?.close();
+    };
+  }, []);
 
   // --- Handlers ---
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = useCallback((event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
     setError(null);
     setResult(null);
+    setLogs([]);
     setSelectedMdxIndex(0);
 
-    // --- Updated Request Body ---
+    eventSourceRef.current?.close();
+
     const requestBody: {
         query: string;
         max_urls: number;
         max_depth: number;
         crawl_depth: number;
         time_limit: number;
-        firecrawl_api_key?: string; // Make it optional here
+        firecrawl_api_key?: string;
     } = {
       query,
       max_urls: maxUrls,
@@ -97,45 +109,121 @@ export default function Home() {
       time_limit: timeLimit,
     };
 
-    // Only include the API key if it's provided
     if (firecrawlApiKey.trim() !== '') {
         requestBody.firecrawl_api_key = firecrawlApiKey.trim();
     }
-    // --- End Updated Request Body ---
 
-    try {
-      const response = await fetch(`${API_URL}/supercrawler`, {
+    const url = `${API_URL}/supercrawler`;
+
+    fetch(url, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+            'Content-Type': 'application/json',
+            'Accept': 'text/event-stream'
         },
         body: JSON.stringify(requestBody),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data as ApiError);
-        console.error('API Error:', data);
-      } else {
-        setResult(data as CrawlResult);
-        console.log('API Success:', data);
-        if (data.mdx_files && data.mdx_files.length > 0) {
-            setSelectedMdxIndex(0);
+    }).then(response => {
+        if (!response.ok) {
+            return response.json().then(errData => {
+                throw new Error(errData.error || `HTTP error! status: ${response.status}`);
+            }).catch(() => {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            });
         }
-      }
-    } catch (err) {
-      console.error('Fetch Error:', err);
-      setError({
-        error: err instanceof Error ? err.message : 'An unknown network error occurred',
-        logs: ['Network request failed. Is the Rust API running?'],
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+        if (!response.body) {
+            throw new Error("Response body is null");
+        }
 
-  const getCurrentLogs = () => result?.logs || error?.logs || [];
+        const reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
+        let buffer = '';
+
+        function push() {
+            reader.read().then(({ done, value }) => {
+                if (done) {
+                    console.log('Stream complete');
+                    if (!result && !error) {
+                        setError({ error: "Stream ended without completion data." });
+                    }
+                    setIsLoading(false);
+                    return;
+                }
+
+                buffer += value;
+                let boundary = buffer.indexOf('\n\n');
+
+                while (boundary !== -1) {
+                    const chunk = buffer.substring(0, boundary);
+                    buffer = buffer.substring(boundary + 2);
+
+                    const lines = chunk.split('\n');
+                    let eventType = 'message';
+                    let eventData = '';
+
+                    lines.forEach(line => {
+                        if (line.startsWith('event: ')) {
+                            eventType = line.substring(7).trim();
+                        } else if (line.startsWith('data: ')) {
+                            eventData += line.substring(6).trim() + '\n';
+                        }
+                    });
+
+                    eventData = eventData.trim();
+
+                    if (eventData) {
+                        if (eventType === 'log') {
+                            setLogs(prev => [...prev, eventData]);
+                        } else if (eventType === 'completion') {
+                            try {
+                                const parsedData: CrawlResult = JSON.parse(eventData);
+                                setResult(parsedData);
+                                if (parsedData.mdx_files && parsedData.mdx_files.length > 0) {
+                                    setSelectedMdxIndex(0);
+                                }
+                                setError(null);
+                            } catch (e) {
+                                console.error("Failed to parse completion data:", e, eventData);
+                                setError({ error: "Failed to parse final results from stream." });
+                            }
+                            setIsLoading(false);
+                            reader.cancel();
+                            return;
+                        } else if (eventType === 'error') {
+                            try {
+                                const parsedError: ApiError = JSON.parse(eventData);
+                                setError(parsedError);
+                            } catch (e) {
+                                console.error("Failed to parse error data:", e, eventData);
+                                setError({ error: eventData || "Received an unnamed error from stream." });
+                            }
+                            setIsLoading(false);
+                            reader.cancel();
+                            return;
+                        }
+                    }
+
+                    boundary = buffer.indexOf('\n\n');
+                }
+                push();
+            }).catch(err => {
+                console.error('Stream reading error:', err);
+                setError({ error: `Stream reading failed: ${err.message}` });
+                setIsLoading(false);
+            });
+        }
+        push();
+
+    }).catch(err => {
+        console.error('Fetch/SSE Error:', err);
+        setError({
+            error: err instanceof Error ? err.message : 'An unknown network error occurred',
+            logs: ['Network request failed. Is the Rust API running and CORS configured?'],
+        });
+        setIsLoading(false);
+    });
+
+  }, [query, maxUrls, firecrawlDepth, crawlDepth, timeLimit, firecrawlApiKey, result, error]);
+
+  const getCurrentLogs = () => logs;
   const getCurrentTimings = () => result?.timings || error?.timings;
   const selectedMdxContent = result?.mdx_files?.[selectedMdxIndex]?.[1] ?? '';
   const selectedMdxFilename = result?.mdx_files?.[selectedMdxIndex]?.[0] ?? '';
@@ -208,7 +296,7 @@ export default function Home() {
                   <input
                     type="number"
                     id="firecrawlDepth"
-                    min="0"
+                    min="1"
                     max="5"
                     value={firecrawlDepth}
                     onChange={(e) => setFirecrawlDepth(parseInt(e.target.value, 10))}
@@ -216,7 +304,7 @@ export default function Home() {
                     className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-all duration-200"
                   />
                   <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                    Firecrawl&apos;s link follow depth (0-5)
+                    Firecrawl&apos;s link follow depth (1-5)
                   </p>
                 </div>
 
@@ -246,7 +334,7 @@ export default function Home() {
                   <input
                     type="number"
                     id="timeLimit"
-                    min="30"
+                    min="150"
                     max="600"
                     step="10"
                     value={timeLimit}
@@ -255,7 +343,7 @@ export default function Home() {
                     className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-all duration-200"
                   />
                   <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                    Max execution time (30-600s)
+                    Max execution time (150-600s)
                   </p>
                 </div>
               </div>
@@ -305,10 +393,18 @@ export default function Home() {
           </form>
 
           {/* Results Section */}
-          {(isLoading || error || result) && (
+          {(isLoading || error || logs.length > 0 || result) && (
             <div className="backdrop-blur-xl bg-white/80 dark:bg-black/80 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-2xl p-8 transition-all duration-300">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-8">Results</h2>
               
+              {/* Loading Indicator during stream */}
+              {isLoading && !result && !error && (
+                  <div className="flex justify-center items-center py-6 text-gray-500 dark:text-gray-400">
+                      <Loader2 className="w-6 h-6 animate-spin mr-3" />
+                      <span>Receiving stream...</span>
+                  </div>
+              )}
+
               {/* Error Display */}
               {error && (
                 <div className="bg-red-50 dark:bg-red-900/30 mb-6 p-4 border border-red-200 dark:border-red-800 rounded-md">
@@ -317,11 +413,17 @@ export default function Home() {
                     <h3 className="font-medium text-red-800 dark:text-red-200 text-lg">Error</h3>
                   </div>
                   <p className="mt-2 text-red-700 dark:text-red-300 text-sm">{error.error}</p>
+                   {/* Optionally display logs that came with the error */}
+                   {error.logs && error.logs.length > 0 && (
+                       <div className="mt-3 border-t border-red-200 dark:border-red-700 pt-2">
+                           <p className="text-xs text-red-600 dark:text-red-400 font-mono">{error.logs.join('\n')}</p>
+                       </div>
+                   )}
                 </div>
               )}
 
               {/* Timing Info */}
-              {getCurrentTimings() && (
+              {result?.timings && (
                 <div className="bg-blue-50 dark:bg-blue-900/30 mb-6 p-4 border border-blue-200 dark:border-blue-800 rounded-md">
                   <div className="flex items-center mb-2">
                     <Clock className="mr-2 w-5 h-5 text-blue-600 dark:text-blue-400"/>
@@ -329,44 +431,42 @@ export default function Home() {
                   </div>
                   <div className="gap-x-4 gap-y-2 grid grid-cols-2 md:grid-cols-3 text-blue-700 dark:text-blue-300 text-sm">
                     {/* Top level timings */}
-                    {getCurrentTimings()?.total_seconds != null && <span className="font-semibold">Total: {getCurrentTimings()?.total_seconds?.toFixed(2)}s</span>}
-                    {getCurrentTimings()?.firecrawl_api_seconds != null && <span>Firecrawl API: {getCurrentTimings()?.firecrawl_api_seconds?.toFixed(2)}s</span>}
-                    {getCurrentTimings()?.mdx_crawler_seconds != null && <span>MDX Crawler: {getCurrentTimings()?.mdx_crawler_seconds?.toFixed(2)}s</span>}
+                    {result.timings.total_seconds != null && <span className="font-semibold">Total: {result.timings.total_seconds.toFixed(2)}s</span>}
+                    {result.timings.firecrawl_api_seconds != null && <span>Firecrawl API: {result.timings.firecrawl_api_seconds.toFixed(2)}s</span>}
+                    {result.timings.mdx_crawler_seconds != null && <span>MDX Crawler: {result.timings.mdx_crawler_seconds.toFixed(2)}s</span>}
 
-                    {/* Nested Params - show what was actually used */}
-                    {(() => {
-                      const params = getCurrentTimings()?.params;
-                      if (!params) return null;
-                      return (
+                    {/* Display used params from result.params */}
+                    {result.params && (
                         <>
-                          {params.used_max_urls != null && (
-                            <span>Used Max URLs: {params.used_max_urls}</span>
-                          )}
-                          {params.used_firecrawl_depth != null && (
-                            <span>Used Firecrawl Depth: {params.used_firecrawl_depth}</span>
-                          )}
-                          {params.used_crawl_depth != null && (
-                            <span>Used MDX Depth: {params.used_crawl_depth}</span>
-                          )}
-                          {params.used_time_limit != null && (
-                            <span>Used Time Limit: {params.used_time_limit}s</span>
-                          )}
+                         {result.params.used_max_urls != null && (
+                           <span>Used Max URLs: {result.params.used_max_urls}</span>
+                         )}
+                         {result.params.used_firecrawl_depth != null && (
+                           <span>Used Firecrawl Depth: {result.params.used_firecrawl_depth}</span>
+                         )}
+                         {result.params.used_crawl_depth != null && (
+                           <span>Used MDX Depth: {result.params.used_crawl_depth}</span>
+                         )}
+                         {result.params.used_time_limit != null && (
+                           <span>Used Time Limit: {result.params.used_time_limit}s</span>
+                         )}
                         </>
-                      );
-                    })()}
+                    )}
                   </div>
                 </div>
               )}
 
               {/* Logs Display */}
-              {getCurrentLogs().length > 0 && (
+              {(logs.length > 0) && (
                 <div className="mb-6">
                   <h3 className="flex items-center mb-2 font-medium text-lg">
-                    <List className="mr-2 w-5 h-5"/> Logs ({getCurrentLogs().length})
+                    <List className="mr-2 w-5 h-5"/> Logs ({logs.length})
                   </h3>
-                  <div className="bg-gray-50 dark:bg-gray-800 p-3 border border-subtle-light dark:border-subtle-dark rounded h-64 overflow-y-auto font-mono text-xs">
-                    {getCurrentLogs().map((log, index) => (
-                      <p key={index} className={`whitespace-pre-wrap ${log.startsWith('❌') || log.includes('Error') ? 'text-red-600 dark:text-red-400' : log.startsWith('⚠️') || log.includes('Warning') ? 'text-yellow-600 dark:text-yellow-400' : log.startsWith('✅') || log.includes('Success') ? 'text-green-600 dark:text-green-400': 'text-gray-600 dark:text-gray-300'}`}>
+                  <div 
+                    className="bg-gray-50 dark:bg-gray-800 p-3 border border-gray-200 dark:border-gray-700 rounded h-64 overflow-y-auto font-mono text-xs"
+                  >
+                    {logs.map((log, index) => (
+                      <p key={index} className={`whitespace-pre-wrap ${log.startsWith('[ERROR]') || log.startsWith('❌') ? 'text-red-600 dark:text-red-400' : log.startsWith('[WARN]') || log.startsWith('⚠️') ? 'text-yellow-600 dark:text-yellow-400' : log.startsWith('[INFO]') || log.startsWith('✅') ? 'text-green-600 dark:text-green-400': 'text-gray-600 dark:text-gray-300'}`}>
                         {log}
                       </p>
                     ))}
@@ -389,7 +489,7 @@ export default function Home() {
                         id="mdx-select"
                         value={selectedMdxIndex}
                         onChange={(e) => setSelectedMdxIndex(parseInt(e.target.value))}
-                        className="bg-background-light dark:bg-gray-800 shadow-sm px-3 py-2 border border-subtle-light dark:border-subtle-dark rounded-md focus:outline-none focus:ring-2 w-full md:w-1/2 text-foreground-light dark:text-foreground-dark focus:ring-accent-light dark:focus:ring-accent-dark"
+                        className="w-full md:w-1/2 px-3 py-2 rounded-md bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-all duration-200"
                       >
                         {result.mdx_files.map(([filename], index) => (
                           <option key={index} value={index}>

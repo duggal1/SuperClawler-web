@@ -30,6 +30,7 @@ import SuperCrawlers from '@/components/integrations-1';
 import  ChartSuperCrawler  from '@/components/charts/super-crawler/charts';
 import AnimationContainer from '@/components/Contaniers/global-motion';
 import { HeroHeader } from '@/components/hero-header';
+import { SplineSceneWrapper } from '@/components/spline/spline-3d';
 
 // --- Interfaces ---
 interface CrawlResponse {
@@ -1142,16 +1143,9 @@ export default function Home() {
         >
           <AnimationContainer delay={0.2}>
             
-             <div className="absolute inset-0 z-0">
-           <SplineScene 
-             // Conditionally set the scene based on the theme
-             scene={isDarkMode 
-               ? "https://prod.spline.design/vsaphMWTFpDw8RsO/scene.splinecode" // Dark mode scene
-               : "https://prod.spline.design/a-X-XpK4S2NGpwdR/scene.splinecode" // Light mode scene
-             }
-             className="w-full h-full" // Ensure it fills the container
-           />
-           </div>
+          <div className="absolute inset-0 z-0">
+  <SplineSceneWrapper />
+</div>
          
         
           </AnimationContainer>
