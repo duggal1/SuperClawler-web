@@ -1,4 +1,4 @@
-/* eslint-disable prefer-const */
+
 /* eslint-disable @next/next/no-img-element */
 /* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable @typescript-eslint/no-unused-vars */
@@ -31,6 +31,7 @@ import  ChartSuperCrawler  from '@/components/charts/super-crawler/charts';
 import AnimationContainer from '@/components/Contaniers/global-motion';
 import { HeroHeader } from '@/components/hero-header';
 import { SplineSceneWrapper } from '@/components/spline/spline-3d';
+import VideoPlayer from '@/components/videos/videos-loop';
 
 // --- Interfaces ---
 interface CrawlResponse {
@@ -1169,6 +1170,9 @@ export default function Home() {
           >
           Crawl and scrape 1000+ websites in under 2 minutes with our Rust crawler, Built for speed, low latency, and extreme scalability.
           </MotionContainer>
+          <div className="w-full max-w-2xl mb-8">
+         
+        </div>
 
           {/* Text Content Container 4 - Make it relative and on top */}
           <MotionContainer
@@ -1190,7 +1194,7 @@ export default function Home() {
               </div>
             ))}
           </MotionContainer>
-
+        
          
           <MotionContainer
             animation="fadeIn"
@@ -1200,6 +1204,8 @@ export default function Home() {
             <div className="bg-gradient-to-r from-indigo-500 to-purple-500 opacity-70 mx-auto mb-8 rounded-full w-36 h-1.5" />
           </MotionContainer>
         </MotionContainer>
+        <VideoPlayer src="/videos/demo.mp4" className="shadow-lg" />
+
         <AnimationContainer delay={0.3}>
         <MotionContainer
           animation="fadeInUp"
